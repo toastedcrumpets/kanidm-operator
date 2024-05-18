@@ -7,11 +7,11 @@ Kubernetes operator that allows you to create groups, OAuth clients, Accounts an
 
 First, apply the custom resource definitions to your cluster using
 
-`kubectl apply -k https://github.com/sbordeyne/kanidm-operator/tree/master/manifests/crds`
+`kubectl apply -k github.com/toastedcrumpets/kanidm-operator/manifests/crds?ref=master`
 
 This will apply the latest `CustomResourceDefinition` for the operator. Then, deploy the operator with
 
-`kubectl apply -k https://github.com/sbordeyne/kanidm-operator/tree/master/manifests/operator`
+`kubectl apply -k github.com/toastedcrumpets/kanidm-operator/manifests/operator?ref=master`
 
 Which will deploy the operator in the `kanidm-system` namespace.
 
@@ -24,7 +24,7 @@ metadata:
   name: kanidm
   namespace: kanidm
 spec:
-  version: 1.1.0-beta.13
+  version: 1.2.0
   database:
     fsType: other
     storageClass: nfs-client
