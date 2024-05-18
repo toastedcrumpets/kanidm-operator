@@ -23,5 +23,5 @@ commonLabels:
 
 images:
   - name: kanidm-operator
-    newName: sbordeyne/kanidm-operator
-    newTag: 1.1.0-beta.13-1
+    newName: toastedcrumpets/kanidm-operator
+    newTag: latest
