@@ -27,7 +27,7 @@ spec:
               properties:
                 version:
                   type: string
-                  pattern: ^\d+\.\d+\.\d+(-(alpha|beta|rc)\.?\d+)$
+                  pattern: ^\d+(\.\d+)(\.\d+)?(-(alpha|beta|rc)\.?\d*)?$
                 webPort:
                   type: number
                 ldapPort:
