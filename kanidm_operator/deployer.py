@@ -44,10 +44,6 @@ class Deployer:
         )
         self.env.filters["b64enc"] = b64enc
         self.env.filters["slugify"] = slugify
-        self.yaml = yaml.YAML(
-            typ="safe",
-            pure=True,
-        )
         self.logger.info("Deployer initialization complete, env loaded.")
 
     def _create_resource(
@@ -158,7 +154,7 @@ class Deployer:
         }
         template = self.env.get_template(name=template_name, globals=variables)
         rendered_yaml = template.render(**extra_variables)
-        resource = self.yaml.load(rendered_yaml)
+        resource = yaml.safe_load(rendered_yaml)
         kopf.adopt(resource)
         return self.create_resource_factory(
             api_version=resource["apiVersion"],

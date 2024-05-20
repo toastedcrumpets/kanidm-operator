@@ -2,7 +2,7 @@
 name = "kanidm_operator"
 version = "1.1.0"
 description = "Kubernetes Operator to manage Kanidm resources"
-authors = ["sbordeyne <simon.bordeyne@gmail.com>"]
+authors = ["sbordeyne <simon.bordeyne@gmail.com>", "toastedcrumpets <m.bannerman@gmail.com"]
 license = "MIT"
 readme = "README.md"
 packages = [{include = "kanidm_operator"}]
@@ -10,10 +10,11 @@ packages = [{include = "kanidm_operator"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 kubernetes = "^28.1.0"
-kopf = "^1.36.2"
+kopf = "^1.37.2"
 jinja2 = "^3.1.2"
 pyyaml = "^6.0.1"
 pykanidm = "^1.0.0"
+async-timeout = "^4.0.3"
 
 [tool.poetry.group.dev.dependencies]
 pylama = "^8.4.1"

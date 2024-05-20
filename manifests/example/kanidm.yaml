@@ -1,14 +1,19 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: kanidm-test
+---
 apiVersion: kanidm.github.io/v1alpha1
 kind: Kanidm
 metadata:
   name: kanidm
-  namespace: kanidm
+  namespace: kanidm-test
 spec:
-  version: 1.1.0-beta.13
+  version: 1.2.0
   database:
     fsType: other
     arcSize: 2048
-    storageClass: nfs-client
+    storageClass: longhorn
     storageSize: 1Gi
   domain: idm.example.com
   certificate:
@@ -16,12 +21,13 @@ spec:
   logLevel: info
   backup:
     enabled: true
-    schedule: "0 0 * * *"
+    schedule: "0 9 * * *"
     versions: 7
-    storageClass: nfs-client
+    storageClass: longhorn
     storageSize: 7Gi
   webPort: 8443
   ldapPort: 3890
   highAvailability:
     enabled: false
     replicas: 1
+...
