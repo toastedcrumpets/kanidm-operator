@@ -24,4 +24,4 @@ commonLabels:
 images:
   - name: kanidm-operator
     newName: toastedcrumpets/kanidm-operator
-    newTag: 1.0.6
+    newTag: 1.0.7
