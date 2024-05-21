@@ -9,25 +9,29 @@ metadata:
   name: kanidm
   namespace: kanidm-test
 spec:
+  #All these fields are currently required! TODO make them optional
   version: 1.2.0
   database:
     fsType: other
-    arcSize: 2048
     storageClass: longhorn
+    arcSize: 2048
     storageSize: 1Gi
-  domain: idm.example.com
+  domain: idm.example.com # Put your actual domain here, needed as we issue certificates for it
   certificate:
-    issuer: cluster-issuer
+    issuer: letsencrypt-prod # Put your actual issuer here, something from cert-manager
   logLevel: info
   backup:
     enabled: true
     schedule: "0 9 * * *"
     versions: 7
-    storageClass: longhorn
+    storageClass: longhorn # Set your storage class here for the backup
     storageSize: 7Gi
   webPort: 8443
   ldapPort: 3890
   highAvailability:
-    enabled: false
+    enabled: false #HA is not working
     replicas: 1
+  ingress:
+    enabled: false #Ingress is currently broken, do not enable.
+    trustXForwardedFor: true
 ...

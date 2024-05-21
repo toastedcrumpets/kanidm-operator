@@ -22,14 +22,20 @@ spec:
       maxUnavailable: 25%
     type: RollingUpdate
   template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kanidm
     spec:
+      securityContext:
+        # Run as a non root user, but also make the mounts match this user group
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
       containers:
       - name:  kanidm
         image:  {{ image }}
-        imagePullPolicy: IfNotPresent
-        securityContext:
-          runAsUser: 1000
-          runAsGroup: 1000
+        imagePullPolicy: IfNotPresent     
         resources:
           requests:
             cpu: 100m
