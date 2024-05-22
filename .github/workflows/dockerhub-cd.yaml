@@ -20,7 +20,7 @@ jobs:
       - name: Spin up a k8s cluster
         uses: helm/kind-action@v1
         with:
-          version: v1.20.7
+          version: v0.23
       - name: Install CRDs
         run: |
           kubectl apply -k manifests/crds
