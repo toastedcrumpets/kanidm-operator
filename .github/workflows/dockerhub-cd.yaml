@@ -4,13 +4,13 @@ on:
   # Pushes and tags trigger the full workflow
   push:
     branches:
-      - 'main'
+      - 'master'
     tags:
       - 'v*'
   # Pull requests only trigger the unit tests
   pull_request:
     branches:
-      - 'main'
+      - 'master'
 jobs:
   tests:
     runs-on: ubuntu-latest
