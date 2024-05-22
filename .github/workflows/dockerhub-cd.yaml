@@ -1,0 +1,49 @@
+name: Build, test, and deploy to Docker Hub
+
+on:
+  # Pushes and tags trigger the full workflow
+  push:
+    branches:
+      - 'main'
+    tags:
+      - 'v*'
+  # Pull requests only trigger the unit tests
+  pull_request:
+    branches:
+      - 'main'
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+      - name: Spin up a k8s cluster
+        uses: helm/kind-action@v1
+        with:
+          version: v1.20.7
+      - name: Install CRDs
+        run: |
+          kubectl apply -k manifests/crds
+  deploy:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4      
+      - name: Extract metadata (tags, labels) for docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ github.repository }} # this will be toastedcrumpets/kanidm-operator
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'      
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          push: ${{ github.event_name != 'pull_request' }} # Don't push images for pull requests
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
