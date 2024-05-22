@@ -36,5 +36,5 @@ spec:
           - --liveness=http://0.0.0.0:8080/healthz
           - --standalone
           - --all-namespaces
-          - --debug
+          - --verbose
           - /app/start.py
