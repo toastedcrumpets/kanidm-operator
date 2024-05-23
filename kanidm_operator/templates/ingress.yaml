@@ -6,17 +6,13 @@ metadata:
     {% for key, value in annotations.items() %}
     {{ key }}: {{ value }}
     {% endfor %}
-    {% if ingress_controller == "caddy" and "kubernetes.io/ingress.class" not in annotations%}
-    kubernetes.io/ingress.class: caddy
-    {% endif %}
-    {% if ingress_controller == "nginx "%}
-
+    kubernetes.io/ingress.class: {{ ingressClass }}
     cert-manager.io/cluster-issuer: {{ certificate_issuer }}
 spec:
   tls:
   - hosts:
     - {{ hostname }}
-    secretName: kanidm-cert-prod
+    secretName: kanidm-ingress-cert
   rules:
   - host: {{ hostname }}
     http:

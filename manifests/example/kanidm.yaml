@@ -32,6 +32,9 @@ spec:
     enabled: false #HA is not working
     replicas: 1
   ingress:
-    enabled: false #Ingress is currently broken, do not enable.
+    enabled: true
+    ingressClass: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     trustXForwardedFor: true
 ...

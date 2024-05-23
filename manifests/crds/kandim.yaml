@@ -92,12 +92,11 @@ spec:
                   properties:
                     enabled:
                       type: boolean
-                    reverseProxy:
+                    ingressClass:
                       type: string
-                      enum:
-                        - nginx
-                        - traefik
-                        - caddy
-                        - haproxy
+                    annotations:
+                      type: object
+                      additionalProperties:
+                        type: string
                     trustXForwardedFor:
                       type: boolean
