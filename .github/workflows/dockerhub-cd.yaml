@@ -19,9 +19,22 @@ jobs:
         uses: actions/checkout@v4
       - name: Spin up a k8s cluster
         uses: helm/kind-action@v1
-      - name: Install CRDs
-        run: |
-          kubectl apply -k manifests/crds
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install poetry
+        uses: abatilo/actions-poetry@v2
+      - uses: actions/cache@v3
+        name: Define a cache for the virtual environment based on the dependencies lock file
+        with:
+          path: ./.venv
+          key: venv-${{ hashFiles('poetry.lock') }}
+      - name: Install the project dependencies
+        run: poetry install
+      - name: Run the automated tests
+        run: poetry run pytest -v      
+          
   deploy:
     needs: tests
     runs-on: ubuntu-latest
