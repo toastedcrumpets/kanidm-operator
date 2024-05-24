@@ -18,7 +18,7 @@ async def on_create_account(
     async with InClusterKanidmClient(namespace, "idm_admin", logger=logger) as client:
         await client.person_account_create(
             name=spec["name"],
-            display_name=spec["displayName"],
+            displayname=spec["displayName"],
         )
         account = await client.person_account_get(spec["name"])
     patch = {
