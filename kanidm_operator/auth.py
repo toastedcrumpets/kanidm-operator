@@ -15,13 +15,17 @@ from kubernetes.client.models.v1_object_meta import V1ObjectMeta
 from kubernetes.client.models.v1_secret import V1Secret
 
 from kanidm_operator.deployer import slugify
-
+import os
 
 def get_incluster_config(
     namespace: str,
     username: str,
 ) -> KanidmClientConfig:
-    config.load_incluster_config()
+    if os.getenv("KUBERNETES_SERVICE_HOST"):
+        config.load_incluster_config()
+    else:
+        config.load_kube_config()
+
     core = kube_client.CoreV1Api()
     secret: V1Secret = core.list_namespaced_secret(
         namespace,
