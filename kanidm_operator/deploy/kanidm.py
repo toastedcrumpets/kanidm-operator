@@ -5,6 +5,7 @@ Will read the kanidms.kanidm.github.io CRD to deploy either:
   - In Single Instance mode : 1 kanidm instance with UI as a deployment
 """
 
+import re
 import json
 from logging import Logger
 import time
@@ -16,7 +17,7 @@ import kopf
 
 from kanidm_operator.deployer import Deployer
 from kanidm_operator.typing.kanidm import KanidmResource
-
+from kubernetes.stream import stream
 
 @kopf.on.create("kanidm.github.io", "v1alpha1", "kanidms")
 async def on_create_kanidms(
@@ -96,21 +97,28 @@ async def on_create_kanidms(
         status: V1PodStatus = pod.status
         if status.phase == "Running":
             done = True
-            admin_password: str = json.loads(
-                core.connect_get_namespaced_pod_exec(
+            logger.info("Kanidm pod is running, updating admin secrets")
+            
+            resp = stream(core.connect_get_namespaced_pod_exec,
                     pod.metadata.name,
                     namespace,
                     container="kanidm",
-                    command=["kanidmd", "recover-account", "-o json", "admin"],
+                    command=["kanidmd", "recover-account", "-o", "json", "admin"],
+                    stderr=False, stdin=False, stdout=True, tty=False,
                 )
-            )["password"]
-            idm_admin_password: str = json.loads(
-                core.connect_get_namespaced_pod_exec(
+            # We have to separate out the json from the rest of the response, as
+            # kanidmd pollutes its output with logs
+            resp_json = re.search(r"\{[\"a-zA-Z0-9:]*\}", resp, re.MULTILINE)
+            
+            admin_password: str = json.loads(resp_json.group(0))["password"]
+            resp = stream(core.connect_get_namespaced_pod_exec,
                     pod.metadata.name,
                     namespace,
-                    command=["kanidmd", "recover-account", "-o json", "idm_admin"],
-                )
-            )["password"]
+                    command=["kanidmd", "recover-account", "-o", "json", "idm_admin"],
+                    stderr=False, stdin=False, stdout=True, tty=False,
+            )
+            resp_json = re.search(r"\{[\"a-zA-Z0-9:]*\}", resp, re.MULTILINE)
+            idm_admin_password: str = json.loads(resp_json.group(0))["password"]
             deployer.deploy(
                 "secret.yaml",
                 username="admin",
