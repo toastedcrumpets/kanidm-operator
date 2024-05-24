@@ -16,6 +16,17 @@ spec:
     spec:
       serviceAccountName: kanidm-operator-account
       containers:
+      - name: kanidm-tools
+        image: docker.io/kanidm/tools
+        imagePullPolicy: Always
+        command: ["sleep", "infinity"]
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
       - name: kanidm-operator
         image: kanidm-operator
         imagePullPolicy: Always
@@ -26,15 +37,16 @@ spec:
           requests:
             cpu: 100m
             memory: 100Mi
-        #livenessProbe:
-        #  httpGet:
-        #    path: /healthz
-        #    port: 8080        
-        #command: ["sleep"]
-        #args: ["infinity"]
+        livenessProbe:
+          initialDelaySeconds: 60 #poetry and kopf together take a long time to initialise
+          httpGet:
+            path: /healthz
+            port: 8080        
         args:
           - --liveness=http://0.0.0.0:8080/healthz
           - --standalone
           - --all-namespaces
           - --verbose
           - /app/start.py
+          #- --module
+          #- /app/kanidm_operator
