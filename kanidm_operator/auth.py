@@ -26,11 +26,11 @@ def get_incluster_config(
     secret: V1Secret = core.list_namespaced_secret(
         namespace,
         label_selector=f"kanidm.github.io/credentials-for={slugify(username)}",
-    ).data[0]
+    ).items[0]
     service: V1Service = core.list_namespaced_service(
         namespace=namespace,
         label_selector="app.kubernetes.io/name=kanidm-svc",
-    ).data[0]
+    ).items[0]
     service_metadata: V1ObjectMeta = service.metadata
     service_name: str = service_metadata.name
     port: int = [port for port in service.spec.ports if port.name == "https"][0].port
