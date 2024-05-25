@@ -33,6 +33,33 @@ spec:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
       containers:
+      - name: kanidm-tools
+        image: docker.io/kanidm/tools
+        imagePullPolicy: Always
+        command: ["sleep", "infinity"]
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - name: config
+          mountPath: /data/server.toml
+          subPath: server.toml
+          readOnly: true
+        - name: certs
+          mountPath: /certs
+          readOnly: true
+        - name: db
+          mountPath: /db
+        - name: backups
+          mountPath: /backups
+        - name: data
+          mountPath: /data
+        - name: cache
+          mountPath: /.cache
       - name:  kanidm
         image:  {{ image }}
         imagePullPolicy: IfNotPresent     
@@ -76,5 +103,7 @@ spec:
           persistentVolumeClaim:
             claimName:  kanidm-backups
         - name: data
+          emptyDir: {}
+        - name: cache
           emptyDir: {}
       restartPolicy: Always

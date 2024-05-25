@@ -16,17 +16,6 @@ spec:
     spec:
       serviceAccountName: kanidm-operator-account
       containers:
-      - name: kanidm-tools
-        image: docker.io/kanidm/tools
-        imagePullPolicy: Always
-        command: ["sleep", "infinity"]
-        resources:
-          limits:
-            cpu: 100m
-            memory: 100Mi
-          requests:
-            cpu: 100m
-            memory: 100Mi
       - name: kanidm-operator
         image: kanidm-operator
         imagePullPolicy: Always
