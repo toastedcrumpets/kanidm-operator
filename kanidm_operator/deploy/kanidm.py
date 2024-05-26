@@ -27,6 +27,7 @@ async def on_create_kanidms(
     logger: Logger,
     **kwargs,
 ):
+    logger.info(f"Creating kanidm instance {name} in namespace {namespace}")
     deployer = Deployer(namespace, spec["version"], logger)
 
     deployer.deploy(
@@ -83,6 +84,7 @@ async def on_create_kanidms(
             annotations={} if "annotations" not in spec["ingress"] else spec["ingress"]["annotations"],
         )
 
+    logger.info(f"All k8s resources for kanidm {name} have been deployed, waiting for pod to be ready")
     done = False
     core = client.CoreV1Api()
     while not done:
@@ -90,56 +92,64 @@ async def on_create_kanidms(
             namespace,
             label_selector="app.kubernetes.io/name=kanidm",
         ).items
+        
         if len(pods) == 0:
+            logger.info(f"Waiting for kanidm {name} pod to be created")
             time.sleep(5)
             continue
+
         pod = pods[0]
         status: V1PodStatus = pod.status
-        if status.phase == "Running":
-            logger.info("Kanidm pod is running, trying to fetch admin and idm_admin passwords")
-            
-            resp = stream(core.connect_get_namespaced_pod_exec,
-                    pod.metadata.name,
-                    namespace,
-                    container="kanidm",
-                    command=["kanidmd", "recover-account", "-o", "json", "admin"],
-                    stderr=False, stdin=False, stdout=True, tty=False,
-                )
-            # We have to separate out the json from the rest of the response, as
-            # kanidmd pollutes its output with logs
-            resp_json = re.search(r"\{[\"a-zA-Z0-9:]*\}", resp, re.MULTILINE)
-            if resp_json is None:
-                logger.info(f"Failed to parse admin password, perhaps kanidm is still booting? Retrying")
-                # If kanidm has not booted yet, then the socket will not be available, so wait a bit
-                time.sleep(2)
-                continue
-            admin_password: str = json.loads(resp_json.group(0))["password"]
-            resp = stream(core.connect_get_namespaced_pod_exec,
-                    pod.metadata.name,
-                    namespace,
-                    container="kanidm",
-                    command=["kanidmd", "recover-account", "-o", "json", "idm_admin"],
-                    stderr=False, stdin=False, stdout=True, tty=False,
+
+        if status.phase != "Running":
+            logger.info(f"Waiting for kanidm {name} pod to be ready, current status: {status.phase}")
+            time.sleep(5)
+            continue
+
+        logger.info("Kanidm pod is running, trying to fetch admin and idm_admin passwords")
+        
+        resp = stream(core.connect_get_namespaced_pod_exec,
+                pod.metadata.name,
+                namespace,
+                container="kanidm",
+                command=["kanidmd", "recover-account", "-o", "json", "admin"],
+                stderr=False, stdin=False, stdout=True, tty=False,
             )
-            resp_json = re.search(r"\{[\"a-zA-Z0-9:]*\}", resp, re.MULTILINE)
-            if resp_json is None:
-                logger.warning(f"Failed to parse idm_admin password, this should not happen!")
-                # If kanidm has not booted yet, then the socket will not be available, so wait a bit
-                time.sleep(2)
-                continue
-            idm_admin_password: str = json.loads(resp_json.group(0))["password"]
-            deployer.deploy(
-                "secret.yaml",
-                username="admin",
-                password=admin_password,
-            )
-            deployer.deploy(
-                "secret.yaml",
-                username="idm_admin",
-                password=idm_admin_password,
-            )
-            logger.info("Kanidm admin and idm_admin passwords have been fetched and stored in secrets")
-            done = True
+        # We have to separate out the json from the rest of the response, as
+        # kanidmd pollutes its output with logs
+        resp_json = re.search(r"\{[\"a-zA-Z0-9:]*\}", resp, re.MULTILINE)
+        if resp_json is None:
+            logger.info(f"Failed to parse admin password, perhaps kanidm is still booting? Retrying")
+            # If kanidm has not booted yet, then the socket will not be available, so wait a bit
+            time.sleep(2)
+            continue
+        admin_password: str = json.loads(resp_json.group(0))["password"]
+        resp = stream(core.connect_get_namespaced_pod_exec,
+                pod.metadata.name,
+                namespace,
+                container="kanidm",
+                command=["kanidmd", "recover-account", "-o", "json", "idm_admin"],
+                stderr=False, stdin=False, stdout=True, tty=False,
+        )
+        resp_json = re.search(r"\{[\"a-zA-Z0-9:]*\}", resp, re.MULTILINE)
+        if resp_json is None:
+            logger.warning(f"Failed to parse idm_admin password, this should not happen!")
+            # If kanidm has not booted yet, then the socket will not be available, so wait a bit
+            time.sleep(2)
+            continue
+        idm_admin_password: str = json.loads(resp_json.group(0))["password"]
+        deployer.deploy(
+            "secret.yaml",
+            username="admin",
+            password=admin_password,
+        )
+        deployer.deploy(
+            "secret.yaml",
+            username="idm_admin",
+            password=idm_admin_password,
+        )
+        logger.info("Kanidm admin and idm_admin passwords have been fetched and stored in secrets")
+        done = True
 
 
 @kopf.on.update("kanidm.github.io", "v1alpha1", "kanidms")

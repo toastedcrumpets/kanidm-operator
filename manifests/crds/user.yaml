@@ -22,14 +22,14 @@ spec:
               required:
                 - name
                 - displayName
+                - kanidmName
+                - email
               properties:
+                kanidmName:
+                  type: string
                 name:
                   type: string
                 displayName:
                   type: string
-                legalName:
+                email:
                   type: string
-                emails:
-                  type: array
-                  items:
-                    type: string

@@ -8,6 +8,7 @@ from kubernetes.client import (
     CustomObjectsApi,
     AppsV1Api,
     NetworkingV1Api,
+    BatchV1Api
 )
 import kopf
 import yaml
@@ -30,6 +31,7 @@ class Deployer:
         self.version = version
         self.apis = {
             "v1": CoreV1Api(),
+            "batch/v1": BatchV1Api(),
             "apps/v1": AppsV1Api(),
             "networking.k8s.io/v1": NetworkingV1Api(),
             "cert-manager.io/v1": CustomObjectsApi(),
@@ -150,6 +152,13 @@ class Deployer:
                 return lambda body: self._create_resource(
                     api,
                     "create_namespaced_persistent_volume_claim",
+                    namespace,
+                    body,
+                )
+            case "Job":
+                return lambda body: self._create_resource(
+                    api,
+                    "create_namespaced_job",
                     namespace,
                     body,
                 )

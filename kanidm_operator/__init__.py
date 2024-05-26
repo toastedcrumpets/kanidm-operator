@@ -13,3 +13,9 @@ from .deploy.group import (
     on_update_group_members,
     on_delete_group,
 )  # noqa
+
+from .deploy.user import (
+    on_create_user, 
+    #on_update_user, 
+    #on_delete_user  
+) # noqa
