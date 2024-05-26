@@ -3,7 +3,6 @@ kind: Kustomization
 
 resources:
   - namespace.yaml  # Namespace should be first
-  - account.yaml
   - group.yaml
   - kandim.yaml
   - oauth2-client.yaml
