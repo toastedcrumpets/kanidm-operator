@@ -14,9 +14,16 @@ RUN apt update && \
         libffi-dev \
         python3-dev \
         ssh \
+        curl \
+        pkg-config \
+        libudev-dev \
         git && \
     rm -rf /var/lib/apt/lists/*
 RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN cargo install kanidm_tools@=1.2.0
 
 RUN pipx install poetry
 RUN poetry config virtualenvs.create true
@@ -31,3 +38,4 @@ RUN --mount=type=ssh poetry install --only=main --no-interaction --no-ansi
 
 ENTRYPOINT ["poetry","-vvv", "run", "kopf", "run"]
 CMD [ "--liveness=http://0.0.0.0:8080/healthz", "--standalone", "--all-namespaces", "--verbose", "/app/start.py"]
+

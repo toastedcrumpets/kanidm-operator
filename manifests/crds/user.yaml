@@ -23,7 +23,7 @@ spec:
                 - name
                 - displayName
                 - kanidmName
-                - email
+                - emails
               properties:
                 kanidmName:
                   type: string
@@ -31,5 +31,7 @@ spec:
                   type: string
                 displayName:
                   type: string
-                email:
-                  type: string
+                emails:
+                  type: array
+                  items:
+                    type: string
