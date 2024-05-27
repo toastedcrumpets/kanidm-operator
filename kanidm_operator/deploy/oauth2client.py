@@ -17,8 +17,10 @@ async def on_create_oauth2client(
     **kwargs,
 ):
     cli_client = KanidmCLIClient(spec["kanidmName"], namespace, logger)
+    # Create the oauth2 client and fetch the secret for the client
     secret = cli_client.create_oauth2client(spec['name'], spec['displayName'], spec['origin'])
 
+    # Save the secret in a k8s secret
     deployer = Deployer(namespace, "N/A", logger)
     deployer.deploy(
         "oauth2secret.yaml",
@@ -26,7 +28,28 @@ async def on_create_oauth2client(
         secret=secret,
     )
 
-#@kopf.on.field("kanidm.github.io", "v1alpha1", "oauth2-clients", field="spec.name")
+    # prefer-short-username is needed for gitea/forgejo
+    if "prefer-short-username" in spec and spec["prefer-short-username"]:
+        result = cli_client.command(['system', 'oauth2', 'prefer-short-username', spec['name']])
+        if result.returncode != 0:
+            raise kopf.TemporaryError(f"Failed to set prefer-short-username for oauth2 client {spec['name']}")
+    
+    if "scope-map" in spec:
+        if "group" not in spec['scope-map']:
+            raise kopf.PermanentError("scope-map must contain a group entry")
+        
+        group = cli_client.get_group(spec['scope-map']['group'])
+        if group is None:
+            raise kopf.TemporaryError(f"Group {spec['scope-map']['group']} does not exist", delay=10)
+
+        if "scopes" not in spec['scope-map'] or not isinstance(spec['scope-map']['scopes'], list):
+            raise kopf.PermanentError("scope-map must contain a scopes entry which is an array")
+        
+        result = cli_client.command(['system', 'oauth2', 'update-scope-map', spec['name'], spec['scope-map']['group']] + spec['scope-map']['scopes'])
+        if result.returncode != 0:
+            raise kopf.TemporaryError(f"Failed to set scope-map for oauth2 client {spec['name']}")
+        
+#@kopf.on.field("kanidm.github.io"  , "v1alpha1", "oauth2-clients", field="spec.name")
 #@kopf.on.field("kanidm.github.io", "v1alpha1", "oauth2-clients", field="spec.kanidmName")
 #async def on_update_oauth2client_name(**kwargs):
 #    raise kopf.PermanentError("User name and kanidmName cannot be changed")

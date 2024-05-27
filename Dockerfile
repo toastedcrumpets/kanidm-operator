@@ -34,7 +34,6 @@ RUN poetry config virtualenvs.create true
 COPY poetry.lock /app/poetry.lock
 COPY pyproject.toml /app/pyproject.toml
 COPY kanidm_operator /app/kanidm_operator
-COPY start.py /app/
 COPY README.md /app/README.md
 RUN --mount=type=ssh poetry install --only=main --no-interaction --no-ansi
 

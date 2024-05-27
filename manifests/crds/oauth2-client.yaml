@@ -33,3 +33,14 @@ spec:
                   type: string
                 kanidmName:
                   type: string
+                prefer-short-username:
+                  type: boolean
+                scope-map:
+                  type: object
+                  properties:
+                    group:
+                      type: string
+                    scopes:
+                      type: array
+                      items:
+                        type: string
