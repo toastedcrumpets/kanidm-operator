@@ -1,9 +1,7 @@
-import json
 from logging import Logger
 
 import kopf
 
-from kanidm_operator.auth import InClusterKanidmClient
 from kanidm_operator.typing.group import GroupResource
 from .util import KanidmCLIClient
 
@@ -22,6 +20,7 @@ async def on_create_group(
     cli_client.set_group_members(spec['name'], spec['members'])
 
 @kopf.on.field("kanidm.github.io", "v1alpha1", "groups", field="spec.name")
+@kopf.on.field("kanidm.github.io", "v1alpha1", "groups", field="spec.kanidmName")
 async def on_update_group_name(**kwargs):
     raise kopf.PermanentError("Group name cannot be changed")
 
