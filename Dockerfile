@@ -36,6 +36,8 @@ COPY start.py /app/
 COPY README.md /app/README.md
 RUN --mount=type=ssh poetry install --only=main --no-interaction --no-ansi
 
-ENTRYPOINT ["poetry","-vvv", "run", "kopf", "run"]
-CMD [ "--liveness=http://0.0.0.0:8080/healthz", "--standalone", "--all-namespaces", "--verbose", "/app/start.py"]
+# Add -vvv after poetry to debug poetry
+ENTRYPOINT ["poetry","run", "kopf", "run"]
+# Add --verbose or even --debug to see more output from kopf 
+CMD [ "--liveness=http://0.0.0.0:8080/healthz", "--standalone", "--all-namespaces", "-m", "kanidm_operator"]
 

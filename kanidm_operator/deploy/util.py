@@ -11,7 +11,7 @@ import json
 
 class KanidmCLIClient:
 
-    def __init__(self, kanidm_name: str, namespace: str, logger: Logger, username: str = "idm_admin"):
+    def __init__(self, kanidm_name: str, namespace: str, logger: Logger, username: str = "idm_admin", silence_missing_kanidm: bool = False):
         self.kanidm_exec="/home/mjki2mb2/.cargo/bin/kanidm"
         self.logger = logger
 
@@ -28,13 +28,17 @@ class KanidmCLIClient:
                 version='v1alpha1',
                 plural="kanidms"
                 )
-        kanidm_spec = None
+        self.kanidm_spec = None
         for k in kanidms["items"]:
             #logger.info(f"Checking {repr(k)}")
             if k["metadata"]["name"] == kanidm_name:
-                kanidm_spec = k
+                self.kanidm_spec = k
                 break
-        if kanidm_spec is None:
+
+        
+        if self.kanidm_spec is None:
+            if silence_missing_kanidm:
+                return
             raise kopf.TemporaryError(f"No Kanidm configuration named {kanidm_name} found in the namespace {namespace}", delay=10)
 
         coreapi = kube_client.CoreV1Api()
@@ -58,7 +62,7 @@ class KanidmCLIClient:
         password = b64decode(secret.data["password"].encode("utf-8")).decode("utf-8")
 
         self.env = dict(
-            KANIDM_URL="https://"+kanidm_spec['spec']["domain"],
+            KANIDM_URL="https://"+self.kanidm_spec['spec']["domain"],
             KANIDM_NAME=username,
             KANIDM_PASSWORD=password,
         )
@@ -86,7 +90,20 @@ class KanidmCLIClient:
             return json.loads(get_result.stdout)
         except json.JSONDecodeError as e:
             raise kopf.TemporaryError(f"Failed to parse user data from kanidm CLI for {username} ({e})", delay=10)
+
+    def get_group(self,name):
+        get_result = self.command(["group", "get", "-o", "json", username])
+        if get_result.returncode != 0:
+            raise kopf.TemporaryError(f"Failed to get group ({get_result.returncode}), stdout={get_result.stdout.decode()}, stderr={get_result.stderr.decode()}", delay=10)
         
+        #We had a successful query, check if there's no matching entries
+        if "No matching group" in get_result.stdout.decode():
+            return None
+        
+        try:
+            return json.loads(get_result.stdout)
+        except json.JSONDecodeError as e:
+            raise kopf.TemporaryError(f"Failed to parse group data from kanidm CLI for {username} ({e})", delay=10)
 
     def create_user(self, username: str, displayname: str):
         # First, check if user already exists
@@ -117,3 +134,25 @@ class KanidmCLIClient:
         result = self.command(["person", "update", username] + [k for m in emails for k in ["-m", m]])
         if result.returncode != 0:
             raise kopf.TemporaryError(f"Failed to update emails for user ({result.returncode}), stdout={result.stdout.decode()}, stderr={result.stderr.decode()}", delay=10)
+
+    def create_group(self, name: str):
+        # First, check if user already exists
+        existing_group_data = self.get_group(name)
+        if existing_group_data == None:
+            create_result = self.command(["person", "create", name])
+            if create_result.returncode != 0:
+                raise kopf.TemporaryError(f"Failed to create group ({create_result.returncode}), stdout={create_result.stdout.decode()}, stderr={create_result.stderr.decode()}", delay=10)
+            # Success, we created the user!
+            return    
+
+        self.logger.warning(f"Group {name} already exists, not creating. {existing_group_data}")
+
+    def set_group_members(self, name: str, members: list[str]):
+        result = self.command(["group", "set-members", name] + members)
+        if result.returncode != 0:
+            raise kopf.TemporaryError(f"Failed to update members for group ({result.returncode}), stdout={result.stdout.decode()}, stderr={result.stderr.decode()}", delay=10)
+        
+    def delete_group(self, name: str):
+        result = self.command(["group", "delete", name])
+        if result.returncode != 0:
+            raise kopf.TemporaryError(f"Failed to delete group ({result.returncode}), stdout={result.stdout.decode()}, stderr={result.stderr.decode()}", delay=10)

@@ -20,27 +20,15 @@ spec:
             spec:
               required:
                 - name
+                - kanidmName
+                - members
               type: object
               properties:
+                kanidmName:
+                  type: string
                 name:
                   type: string
                 members:
                   type: array
                   items:
-                    type: object
-                    oneOf:
-                      - username:
-                          type: string
-                      - group:
-                          type: string
-                      - serviceAccount:
-                          type: string
-                      - userId:
-                          type: string
-                          pattern: uuid
-                      - groupId:
-                          type: string
-                          pattern: uuid
-                      - serviceAccountId:
-                          type: string
-                          pattern: uuid
+                    type: string
