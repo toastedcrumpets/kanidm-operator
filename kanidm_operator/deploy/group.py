@@ -19,10 +19,10 @@ async def on_create_group(
     cli_client.create_group(spec['name'])
     cli_client.set_group_members(spec['name'], spec['members'])
 
-@kopf.on.field("kanidm.github.io", "v1alpha1", "groups", field="spec.name")
-@kopf.on.field("kanidm.github.io", "v1alpha1", "groups", field="spec.kanidmName")
-async def on_update_group_name(**kwargs):
-    raise kopf.PermanentError("Group name cannot be changed")
+#@kopf.on.field("kanidm.github.io", "v1alpha1", "groups", field="spec.name")
+#@kopf.on.field("kanidm.github.io", "v1alpha1", "groups", field="spec.kanidmName")
+#async def on_update_group_name(**kwargs):
+#    raise kopf.PermanentError("Group name cannot be changed")
 
 
 @kopf.on.field("kanidm.github.io", "v1alpha1", "groups", field="spec.members")

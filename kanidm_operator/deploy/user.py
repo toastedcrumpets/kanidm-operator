@@ -20,10 +20,10 @@ async def on_create_user(
     cli_client.create_user(spec['name'], spec['displayName'])
     cli_client.set_user_emails(spec['name'], spec['emails'])
 
-@kopf.on.field("kanidm.github.io", "v1alpha1", "users", field="spec.name")
-@kopf.on.field("kanidm.github.io", "v1alpha1", "users", field="spec.kanidmName")
-async def on_update_group_name(**kwargs):
-    raise kopf.PermanentError("User name and kanidmName cannot be changed")
+#@kopf.on.field("kanidm.github.io", "v1alpha1", "users", field="spec.name")
+#@kopf.on.field("kanidm.github.io", "v1alpha1", "users", field="spec.kanidmName")
+#async def on_update_group_name(**kwargs):
+#    raise kopf.PermanentError("User name and kanidmName cannot be changed")
 
 @kopf.on.delete("kanidm.github.io", "v1alpha1", "users")
 async def on_delete_user(

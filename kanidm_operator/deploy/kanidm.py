@@ -139,12 +139,12 @@ async def on_create_kanidms(
             continue
         idm_admin_password: str = json.loads(resp_json.group(0))["password"]
         deployer.deploy(
-            "secret.yaml",
+            "usersecret.yaml",
             username="admin",
             password=admin_password,
         )
         deployer.deploy(
-            "secret.yaml",
+            "usersecret.yaml",
             username="idm_admin",
             password=idm_admin_password,
         )

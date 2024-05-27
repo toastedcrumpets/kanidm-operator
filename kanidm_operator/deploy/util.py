@@ -8,6 +8,7 @@ from logging import Logger
 from base64 import b64decode
 import subprocess
 import json
+import yaml
 
 class KanidmCLIClient:
 
@@ -105,6 +106,20 @@ class KanidmCLIClient:
         except json.JSONDecodeError as e:
             raise kopf.TemporaryError(f"Failed to parse group data from kanidm CLI for {name} ({e})\nstdout={get_result.stdout.decode()}\nstderr={get_result.stderr.decode()}", delay=10)
 
+    def get_oauth2client(self,name):
+        get_result = self.command(["system", "oauth2", "get", name])
+        if get_result.returncode != 0:
+            raise kopf.TemporaryError(f"Failed to get oauth2client ({get_result.returncode}), stdout={get_result.stdout.decode()}, stderr={get_result.stderr.decode()}", delay=10)
+        
+        #We had a successful query, check if there's no matching entries
+        if "No matching entries" in get_result.stdout.decode():
+            return None
+        
+        try:
+            return yaml.safe_load(get_result.stdout.decode().lstrip('-\n'))
+        except yaml.YAMLError as e:
+            raise kopf.TemporaryError(f"Failed to parse oauth2client data from kanidm CLI for {name} ({e})\nstdout={get_result.stdout.decode()}\nstderr={get_result.stderr.decode()}", delay=10)
+
     def create_user(self, username: str, displayname: str):
         # First, check if user already exists
         existing_user_data = self.get_user(username)
@@ -156,3 +171,25 @@ class KanidmCLIClient:
         result = self.command(["group", "delete", name])
         if result.returncode != 0:
             raise kopf.TemporaryError(f"Failed to delete group ({result.returncode}), stdout={result.stdout.decode()}, stderr={result.stderr.decode()}", delay=10)
+
+    def create_oauth2client(self, name: str, displayname: str, origin: str):
+        # First, check if user already exists
+        existing_client_data = self.get_oauth2client(name)
+        if existing_client_data == None:
+            create_result = self.command(["system", "oauth2", "create", name, displayname, origin])
+            if create_result.returncode != 0:
+                raise kopf.TemporaryError(f"Failed to create oauth2 client ({create_result.returncode}), stdout={create_result.stdout.decode()}, stderr={create_result.stderr.decode()}", delay=10)
+            # Success, we created the oauth token
+        else:
+            self.logger.warning(f"OAuth2 client {name} already exists, not creating. {existing_client_data}")
+
+        secret  = self.command(["system", "oauth2", "show-basic-secret", name])
+        if secret.returncode != 0:
+            raise kopf.TemporaryError(f"Failed to get secret for oauth2 client ({secret.returncode}), stdout={secret.stdout.decode()}, stderr={secret.stderr.decode()}", delay=10)
+        
+        return secret.stdout.decode()
+    
+    def delete_oauth2client(self, name: str):
+        result = self.command(["system", "oauth2", "delete", name])
+        if result.returncode != 0:
+            raise kopf.TemporaryError(f"Failed to delete oauth2client ({result.returncode}), stdout={result.stdout.decode()}, stderr={result.stderr.decode()}", delay=10)

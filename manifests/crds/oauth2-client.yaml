@@ -19,10 +19,17 @@ spec:
           properties:
             spec:
               type: object
+              required:
+                - name
+                - displayName
+                - kanidmName
+                - origin
               properties:
                 name:
                   type: string
                 displayName:
                   type: string
                 origin:
+                  type: string
+                kanidmName:
                   type: string

@@ -60,4 +60,15 @@ spec:
   name: bosses
   members: 
     - marcus
+---
+apiVersion: kanidm.github.io/v1alpha1
+kind: OAuth2Client
+metadata:
+  name: forgejo-oauth
+  namespace: kanidm
+spec:
+  kanidmName: kanidm-instance
+  name: forgejo
+  displayName: Forgejo
+  origin: https://git.eddymir.uk
 ...

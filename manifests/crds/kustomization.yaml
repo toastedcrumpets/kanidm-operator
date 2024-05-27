@@ -6,8 +6,6 @@ resources:
   - group.yaml
   - kandim.yaml
   - oauth2-client.yaml
-  - pw-badlist.yaml
-  - service-account.yaml
   - user.yaml
 
 namespace: kanidm-system
