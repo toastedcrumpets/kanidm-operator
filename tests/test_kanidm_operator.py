@@ -8,7 +8,6 @@ import pytest
 crd_yaml = os.path.relpath(os.path.join(os.path.dirname(__file__), '..', 'manifests/crds'))
 obj_yaml = os.path.relpath(os.path.join(os.path.dirname(__file__), '..', 'manifests/operator'))
 example = os.path.relpath(os.path.join(os.path.dirname(__file__), '..', 'manifests/example'))
-entrypoint = os.path.relpath(os.path.join(os.path.dirname(__file__), '..', 'start.py'))
 
 @pytest.fixture(autouse=True)
 def crd_exists():
@@ -23,7 +22,7 @@ def test_resource_lifecycle():
 
     # Run the operator and simulate some activity!
     with kopf.testing.KopfRunner(
-        ['run', '--all-namespaces', '--verbose', '--standalone', entrypoint],
+        ['run', '--all-namespaces', '--verbose', '--standalone', "-m", "kanidm_operator"],
         timeout=60, settings=settings,
     ) as runner:
         subprocess.run(f"kubectl create -k {example}",
