@@ -44,7 +44,6 @@ async def on_delete_group(
     logger: Logger,
     **kwargs,
 ):
-    cli_client = KanidmCLIClient(spec["kanidmName"], namespace, logger)
     cli_client = KanidmCLIClient(spec["kanidmName"], namespace, logger, silence_missing_kanidm=True)
     if cli_client.kanidm_spec is not None:
         cli_client.delete_group(spec['name'])

@@ -92,18 +92,18 @@ class KanidmCLIClient:
             raise kopf.TemporaryError(f"Failed to parse user data from kanidm CLI for {username} ({e})", delay=10)
 
     def get_group(self,name):
-        get_result = self.command(["group", "get", "-o", "json", username])
+        get_result = self.command(["group", "get", "-o", "json", name])
         if get_result.returncode != 0:
             raise kopf.TemporaryError(f"Failed to get group ({get_result.returncode}), stdout={get_result.stdout.decode()}, stderr={get_result.stderr.decode()}", delay=10)
         
         #We had a successful query, check if there's no matching entries
-        if "No matching group" in get_result.stdout.decode():
+        if "No matching group" in get_result.stderr.decode():
             return None
         
         try:
             return json.loads(get_result.stdout)
         except json.JSONDecodeError as e:
-            raise kopf.TemporaryError(f"Failed to parse group data from kanidm CLI for {username} ({e})", delay=10)
+            raise kopf.TemporaryError(f"Failed to parse group data from kanidm CLI for {name} ({e})\nstdout={get_result.stdout.decode()}\nstderr={get_result.stderr.decode()}", delay=10)
 
     def create_user(self, username: str, displayname: str):
         # First, check if user already exists
@@ -139,7 +139,7 @@ class KanidmCLIClient:
         # First, check if user already exists
         existing_group_data = self.get_group(name)
         if existing_group_data == None:
-            create_result = self.command(["person", "create", name])
+            create_result = self.command(["group", "create", name])
             if create_result.returncode != 0:
                 raise kopf.TemporaryError(f"Failed to create group ({create_result.returncode}), stdout={create_result.stdout.decode()}, stderr={create_result.stderr.decode()}", delay=10)
             # Success, we created the user!

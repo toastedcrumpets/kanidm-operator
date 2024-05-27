@@ -6,7 +6,7 @@ metadata:
 apiVersion: kanidm.github.io/v1alpha1
 kind: Kanidm
 metadata:
-  name: kanidm
+  name: kanidm-instance
   namespace: kanidm
 spec:
   #All these fields are currently required! TODO make them optional
@@ -46,7 +46,7 @@ metadata:
 spec:
   name: marcus
   displayName: Marcus
-  kanidmName: kanidm
+  kanidmName: kanidm-instance
   emails:
     - marcus@eddymir.uk
 ---
@@ -56,7 +56,8 @@ metadata:
   name: bosses
   namespace: kanidm
 spec:
-  name: boss
+  kanidmName: kanidm-instance
+  name: bosses
   members: 
-    - username: marcus
+    - marcus
 ...
