@@ -22,7 +22,7 @@ def test_resource_lifecycle():
 
     # Run the operator and simulate some activity!
     with kopf.testing.KopfRunner(
-        ['run', '--all-namespaces', '--verbose', '--standalone', "-m", "../kanidm_operator"],
+        ['run', '--all-namespaces', '--verbose', '--standalone', "-m", "kanidm_operator"],
         timeout=60, settings=settings,
     ) as runner:
         subprocess.run(f"kubectl create -k {example}",
