@@ -6,8 +6,6 @@ metadata:
     {% for key, value in annotations.items() %}
     {{ key }}: {{ value }}
     {% endfor %}
-    kubernetes.io/ingress.class: {{ ingressClass }}
-    cert-manager.io/cluster-issuer: {{ certificate_issuer }}
 spec:
   tls:
   - hosts:

@@ -92,8 +92,6 @@ spec:
                   properties:
                     enabled:
                       type: boolean
-                    ingressClass:
-                      type: string
                     annotations:
                       type: object
                       additionalProperties:

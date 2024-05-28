@@ -80,7 +80,6 @@ async def on_create_kanidms(
         deployer.deploy(
             "ingress.yaml",
             hostname=spec["domain"],
-            ingressClass=spec["ingress"]["ingressClass"],
             http_port=spec["webPort"],
             annotations={} if "annotations" not in spec["ingress"] else spec["ingress"]["annotations"],
         )
