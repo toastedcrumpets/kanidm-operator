@@ -41,6 +41,10 @@ jobs:
           echo "Pod IP is $INGRESS_IP"
           sudo echo "$INGRESS_IP idm.example.com" | sudo tee -a /etc/hosts
           cat /etc/hosts
+      - name: Install cert-manager, so we can issue a TLS certificate for kanidm
+        run: |
+          kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.5/cert-manager.yaml
+          kubectl wait --for=condition=Available deployment cert-manager-webhook -n cert-manager --timeout=90s
       - name: Create a Certificate Authority that we install to the system for "trusted" SSL communications
         run: |
           sudo apt-get install -y openssl ca-certificates
@@ -49,10 +53,6 @@ jobs:
           kubectl create secret -n cert-manager tls kanidm-ca --cert=KanidmCA.crt --key=KanidmCA.key
           sudo cp KanidmCA.crt /usr/local/share/ca-certificates/KanidmCA.crt
           sudo update-ca-certificates --fresh
-      - name: Install cert-manager, so we can issue a TLS certificate for kanidm
-        run: |
-          kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.5/cert-manager.yaml
-          kubectl wait --for=condition=Available deployment cert-manager-webhook -n cert-manager --timeout=90s
       - name: Install the self-signed cluster certificate issuer to fake a letsencrypt production setup
         run: |
           kubectl apply -f tests/cluster-issuer.yaml
