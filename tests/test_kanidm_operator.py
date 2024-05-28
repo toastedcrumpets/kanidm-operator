@@ -29,9 +29,11 @@ def test_resource_lifecycle():
         ['run', '--all-namespaces', '--standalone', "-m", "kanidm_operator"], #"--verbose",
         timeout=60, settings=settings,
     ) as runner:
-        # Setup the kanidm deployment
+        # Trigger the kanidm deployment using the kanidm CRD
         subprocess.run(f"kubectl apply -f {os.path.join(example, 'kanidm.yaml')}",shell=True, check=True, timeout=30, capture_output=True)
-        # Wait for the deployment to be ready
+        # Wait for the deployment to be "processed" by the operator, so that the deployment is created
+        subprocess.run(r"kubectl wait -n kanidm kanidm kanidm-instance --for=jsonpath='{.metadata.annotations.kanidm\.github\.io/processed}'='true'",shell=True, check=True, timeout=90, capture_output=True)
+        # Wait for the deployment to be "Available", we need to wait for the deployment to be created first
         try:
             subprocess.run(f"kubectl wait --for=condition=Available deployment kanidm -n kanidm --timeout=90s",shell=True, check=True)
         except subprocess.CalledProcessError as e:
