@@ -21,9 +21,10 @@ jobs:
       ##################   Setup the Kubernetes cluster for testing   ##################
       - name: Spin up a k8s cluster
         uses: helm/kind-action@v1
+        with:
+          config: testing/kind-config.yaml
       - name: Install an ingress controller, so we can test that functionality of the operator
         run: |
-          kubectl label nodes --all ingress-ready=true
           kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
           kubectl wait --for=condition=Ready pod -l app.kubernetes.io/component=controller -n ingress-nginx --timeout=90s
       #- name: Describe state of the ingress controller
