@@ -100,25 +100,33 @@ jobs:
       - name: Describe the state of the k8s cluster
         if: always()
         run: |
-          echo "NODES"
+          echo "### NODES"
           kubectl get -A nodes
-          echo "DEPLOYMENTS"
+          echo "### DEPLOYMENTS"
           kubectl get -A deployment
-          echo "PODS"
+          echo "### PODS"
           kubectl get -A pods
-          echo "SERVICES"
+          echo "### SERVICES"
           kubectl get -A service
-          echo "INGRESSES"
+          echo "### INGRESSES"
           kubectl get -A ingress
-          echo "CLUSTER ISSUERS"
+          echo "### CLUSTER ISSUERS"
           kubectl get -A clusterissuer
-          echo "CERTIFICATES"
+          echo "### CERTIFICATES"
           kubectl get -A certificate
-          echo "SECRETS"
+          echo "### SECRETS"
           kubectl get -A secret
 
-          echo "INGRESS details"
-          kubectl describe -A ingress
+          echo "### ### ### ### ### ### "
+
+          echo "### KANIDM CRD"
+          kubectl describe -A kanidm
+          echo "### KANIDM USER CRD"
+          kubectl describe -A user
+          echo "### KANIDM GROUP CRD"
+          kubectl describe -A group
+          echo "### KANIDM OAUTH2 CRD"
+          kubectl describe -A oauth2-clients
   deploy:
     needs: tests
     runs-on: ubuntu-latest
