@@ -14,7 +14,7 @@ spec:
     storageSize: 1Gi
   domain: idm.eddymir.uk # Put your actual domain here, needed as we issue certificates for it
   certificate:
-    issuer: letsencrypt-staging # Put your actual issuer here, something from cert-manager
+    issuer: letsencrypt-prod # Put your actual issuer here, something from cert-manager
   logLevel: info
   backup:
     enabled: true
