@@ -8,7 +8,7 @@ crd_yaml = os.path.relpath(os.path.join(os.path.dirname(__file__), '..', 'manife
 obj_yaml = os.path.relpath(os.path.join(os.path.dirname(__file__), '..', 'manifests/operator'))
 example = os.path.relpath(os.path.join(os.path.dirname(__file__), '..', 'manifests/example'))
 
-# Here we fix kopf's current directory to the root of the project so the module import works
+# Here we change current directory to the root of the project so the module import in KopfRunner works
 currentdir = os.path.dirname(__file__)
 parentdir = os.path.dirname(currentdir)
 os.chdir(parentdir)

@@ -9,8 +9,6 @@ resources:
   - groups.yaml
   - oauth2-client.yaml
   
-namespace: kanidm
-
 # You can change the patches below to suit your own domain!
 patches:
   - target: 

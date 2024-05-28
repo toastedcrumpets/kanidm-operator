@@ -1,13 +1,9 @@
-kind: Namespace
-apiVersion: v1
-metadata:
-  name: kanidm-test
 ---
 apiVersion: kanidm.github.io/v1alpha1
 kind: Kanidm
 metadata:
-  name: kanidm
-  namespace: kanidm-test
+  name: kanidm-instance
+  namespace: kanidm
 spec:
   #All these fields are currently required! TODO make them optional
   version: 1.2.0
@@ -16,9 +12,9 @@ spec:
     storageClass: longhorn
     arcSize: 2048
     storageSize: 1Gi
-  domain: idm.example.com # Put your actual domain here, needed as we issue certificates for it
+  domain: idm.eddymir.uk # Put your actual domain here, needed as we issue certificates for it
   certificate:
-    issuer: letsencrypt-prod # Put your actual issuer here, something from cert-manager
+    issuer: letsencrypt-staging # Put your actual issuer here, something from cert-manager
   logLevel: info
   backup:
     enabled: true
@@ -32,9 +28,9 @@ spec:
     enabled: false #HA is not working
     replicas: 1
   ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: HTTPS
     enabled: true
     ingressClass: nginx
-    annotations:
-      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     trustXForwardedFor: true
 ...
