@@ -13,7 +13,7 @@ import yaml
 class KanidmCLIClient:
 
     def __init__(self, kanidm_name: str, namespace: str, logger: Logger, username: str = "idm_admin", silence_missing_kanidm: bool = False):
-        self.kanidm_exec="/home/mjki2mb2/.cargo/bin/kanidm"
+        self.kanidm_exec="kanidm"
         self.logger = logger
 
         if os.getenv("KUBERNETES_SERVICE_HOST"):
