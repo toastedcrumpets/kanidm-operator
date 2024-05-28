@@ -78,7 +78,7 @@ def test_resource_lifecycle():
         # Trigger adding a oauth2client
         subprocess.run(f"kubectl apply -f {os.path.join(example, 'oauth2-client.yaml')}",shell=True, check=True, timeout=30, capture_output=True)
         # Wait for the group to be "processed" by the operator, so that the deployment is created
-        subprocess.run(r"kubectl wait -n kanidm oauth2-clients forgejo --for=jsonpath='{.metadata.annotations.kanidm\.github\.io/processed}'='true'",shell=True, check=True, timeout=90, capture_output=True)
+        subprocess.run(r"kubectl wait -n kanidm oauth2-clients forgejo-oauth --for=jsonpath='{.metadata.annotations.kanidm\.github\.io/processed}'='true'",shell=True, check=True, timeout=90, capture_output=True)
 
 
     # Ensure that the operator did not die on start, or during the operation.
