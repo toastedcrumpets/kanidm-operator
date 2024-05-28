@@ -24,18 +24,19 @@ jobs:
           kubectl label nodes --all ingress-ready=true
           kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
           kubectl wait --for=condition=Ready pod -l app.kubernetes.io/component=controller -n ingress-nginx --timeout=180s
-      - name: Describe state of the ingress controller
-        if: always()
-        run: |
-          kubectl describe nodes
-          kubectl get pods -n ingress-nginx
-          kubectl describe -n ingress-nginx pod -l app.kubernetes.io/component=controller
-          kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller
+      #- name: Describe state of the ingress controller
+      #  if: always()
+      #  run: |
+      #    kubectl describe nodes
+      #    kubectl get pods -n ingress-nginx
+      #    kubectl describe -n ingress-nginx pod -l app.kubernetes.io/component=controller
+      #    kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller
       - name: Get the ip of the ingress controller, so we can access the ingress
         run: |
-            INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-            echo "Ingress IP: $INGRESS_IP"
-            echo "INGRESS_IP=$INGRESS_IP" >> "$GITHUB_ENV"
+          kubectl get svc -n ingress-nginx ingress-nginx-controller
+          INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          echo "Ingress IP: $INGRESS_IP"
+          echo "INGRESS_IP=$INGRESS_IP" >> "$GITHUB_ENV"
       - name: Install cert-manager, so we can issue a TLS certificate for kanidm
         run: |
           kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.5/cert-manager.yaml
