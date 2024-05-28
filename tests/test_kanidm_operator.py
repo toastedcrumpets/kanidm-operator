@@ -58,15 +58,18 @@ def test_resource_lifecycle():
         # Check ingress is there and SSL is valid
         import requests
         try:
-            assert requests.head("https://idm.example.com", verify='/etc/ssl/certs/ca-certificates.crt') == 200
+            idm_ingress = requests.head("https://idm.example.com", verify='/etc/ssl/certs/ca-certificates.crt') 
         except requests.exceptions.ConnectionError:
             raise Exception("idm.example.com is not reachable")
-        
+
+        # Verify we got a good response
+        assert (idm_ingress.status_code == 200) or (301 <= idm_ingress.status_code <= 307)
+
         # Trigger adding a user
         subprocess.run(f"kubectl apply -f {os.path.join(example, 'users.yaml')}",shell=True, check=True, timeout=30, capture_output=True)
         # Wait for the deployment to be "processed" by the operator, so that the deployment is created
         subprocess.run(r"kubectl wait -n kanidm user marcus --for=jsonpath='{.metadata.annotations.kanidm\.github\.io/processed}'='true'",shell=True, check=True, timeout=90, capture_output=True)
-
+        
 
     # Ensure that the operator did not die on start, or during the operation.
     assert runner.exception is None

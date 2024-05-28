@@ -67,8 +67,7 @@ jobs:
           poetry env use 3.11
       - name: Install the operator python dependencies
         run: poetry install --no-root
-
-      #  Here's an install of kanidm tools from cargo, but its waayyy too slow (3m30)
+      ####  Here's an install of kanidm tools from cargo, but its waayyy too slow (3m30)
       #- name: Setup rust to install kanidm CLI for the operator
       #  uses: hecrj/setup-rust-action@v2
       #- name: Install dependencies for kanidm CLI tool
@@ -76,8 +75,7 @@ jobs:
       #- name: Install kanidm cli tool for use by the operator
       #  run: |
       #    cargo install kanidm_tools@=1.2.0
-      
-      # Much faster install, but they haven't got stable releases yet so may cause an issue
+      #### Much faster install, but they haven't got stable releases yet so may cause an issue
       - name: Install kanidm from the PPA
         run: |
           # Install the key
