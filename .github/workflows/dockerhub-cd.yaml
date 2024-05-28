@@ -25,7 +25,7 @@ jobs:
         run: |
           kubectl label nodes --all ingress-ready=true
           kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
-          kubectl wait --for=condition=Ready pod -l app.kubernetes.io/component=controller -n ingress-nginx --timeout=180s
+          kubectl wait --for=condition=Ready pod -l app.kubernetes.io/component=controller -n ingress-nginx --timeout=90s
       #- name: Describe state of the ingress controller
       #  if: always()
       #  run: |
@@ -36,7 +36,9 @@ jobs:
       - name: Redirect the idm.example.com hostname to the ingress controller, so the operator can access it as normal without a real DNS entry
         run: |
           INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.spec.clusterIP}')
-          echo "Ingress IP is $INGRESS_IP"
+          echo "Service IP is $INGRESS_IP"
+          INGRESS_IP=$(docker container inspect kind-control-plane --format '{{ .NetworkSettings.Networks.kind.IPAddress }}')
+          echo "Pod IP is $INGRESS_IP"
           sudo echo "$INGRESS_IP idm.example.com" | sudo tee -a /etc/hosts
           cat /etc/hosts
       - name: Install cert-manager, so we can issue a TLS certificate for kanidm
