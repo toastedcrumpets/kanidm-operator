@@ -4,17 +4,22 @@ import os.path
 import kopf.testing
 import pytest
 
-
 crd_yaml = os.path.relpath(os.path.join(os.path.dirname(__file__), '..', 'manifests/crds'))
 obj_yaml = os.path.relpath(os.path.join(os.path.dirname(__file__), '..', 'manifests/operator'))
 example = os.path.relpath(os.path.join(os.path.dirname(__file__), '..', 'manifests/example'))
 
+# Here we fix kopf's current directory to the root of the project so the module import works
+currentdir = os.path.dirname(__file__)
+parentdir = os.path.dirname(currentdir)
+os.chdir(parentdir)
+
+# This fixture is automatically run, it installs the CRDs for the operator
 @pytest.fixture(autouse=True)
 def crd_exists():
     subprocess.run(f"kubectl apply -k {crd_yaml}",
                    check=True, timeout=10, capture_output=True, shell=True)
 
-
+# This is a End-to-End test for the operator
 def test_resource_lifecycle():
     # To prevent lengthy threads in the loop executor when the process exits.
     settings = kopf.OperatorSettings()

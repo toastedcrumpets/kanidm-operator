@@ -1,0 +1,12 @@
+---
+apiVersion: kanidm.github.io/v1alpha1
+kind: Group
+metadata:
+  name: git-users
+  namespace: kanidm
+spec:
+  kanidmName: kanidm-instance
+  name: git-users
+  members: 
+    - marcus
+...

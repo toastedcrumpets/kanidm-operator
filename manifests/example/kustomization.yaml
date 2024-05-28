@@ -3,4 +3,27 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
+  - namespace.yaml
   - kanidm.yaml
+  - users.yaml
+  - groups.yaml
+  - oauth2-client.yaml
+  
+namespace: kanidm
+
+# You can change the patches below to suit your own domain!
+patches:
+  - target: 
+      kind: Kanidm
+      name: kanidm
+    patch: |-
+      - op: replace
+        path: /spec/domain
+        value: idm.example.com
+  - target: 
+      kind: OAuth2Client
+      name: forgejo
+    patch: |-
+      - op: replace
+        path: /spec/domain
+        value: idm.example.com

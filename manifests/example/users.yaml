@@ -1,0 +1,13 @@
+---
+apiVersion: kanidm.github.io/v1alpha1
+kind: User
+metadata:
+  name: marcus
+  namespace: kanidm
+spec:
+  name: marcus
+  displayName: Marcus
+  kanidmName: kanidm-instance
+  emails:
+    - marcus@eddymir.uk
+...
