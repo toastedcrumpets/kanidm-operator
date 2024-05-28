@@ -28,13 +28,14 @@ async def on_create_group(
 @kopf.on.field("kanidm.github.io", "v1alpha1", "groups", field="spec.members")
 async def on_update_group_members(
     spec: GroupResource,
-    annotations: dict[str, str],
     namespace: str,
     logger: Logger,
+    patch: dict,
     **kwargs,
 ):
     cli_client = KanidmCLIClient(spec["kanidmName"], namespace, logger)
     cli_client.set_group_members(spec['name'], spec['members'])
+    patch.setdefault("metadata", {}).setdefault("annotations", {})["kanidm.github.io/processed"] = "true"
 
 @kopf.on.delete("kanidm.github.io", "v1alpha1", "groups")
 async def on_delete_group(

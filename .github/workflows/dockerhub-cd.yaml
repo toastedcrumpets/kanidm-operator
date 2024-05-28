@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout the code
         uses: actions/checkout@v4
+
+      ##################   Setup the Kubernetes cluster for testing   ##################
       - name: Spin up a k8s cluster
         uses: helm/kind-action@v1
       - name: Install an ingress controller, so we can test that functionality of the operator
@@ -36,6 +38,9 @@ jobs:
           INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.spec.clusterIP}')
           echo "Ingress IP is $INGRESS_IP"
           echo "INGRESS_IP=$INGRESS_IP" >> "$GITHUB_ENV"
+      - name: Redirect the idm.example.com hostname to the ingress controller, so the operator can access it as normal without a real DNS entry
+        run: |
+          sudo echo "$INGRESS_IP idm.example.com" | sudo tee -a /etc/hosts
       - name: Install cert-manager, so we can issue a TLS certificate for kanidm
         run: |
           kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.5/cert-manager.yaml
@@ -43,9 +48,8 @@ jobs:
       - name: Install the self-signed cluster certificate issuer to fake a letsencrypt production setup
         run: |
           kubectl apply -f tests/cluster-issuer.yaml
-      - name: Redirect the idm.example.com hostname to the ingress controller, so the operator can access it as normal without a real DNS entry
-        run: |
-          sudo echo "$INGRESS_IP idm.example.com" | sudo tee -a /etc/hosts
+
+      ##################   Setup the Python environment for testing   ##################
       - name: Setup python
         uses: actions/setup-python@v5
         with:
@@ -84,6 +88,8 @@ jobs:
           # Install the package
           sudo apt-get update
           sudo apt-get install kanidm
+
+      ##################   Run the tests   ##################
       - name: Run the automated tests
         run: poetry run pytest -v
   deploy:

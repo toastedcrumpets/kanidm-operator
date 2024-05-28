@@ -151,6 +151,7 @@ async def on_create_kanidms(
         )
         logger.info("Kanidm admin and idm_admin passwords have been fetched and stored in secrets")
         done = True
+    
     patch.setdefault("metadata", {}).setdefault("annotations", {})["kanidm.github.io/processed"] = "true"
 
 @kopf.on.update("kanidm.github.io", "v1alpha1", "kanidms")

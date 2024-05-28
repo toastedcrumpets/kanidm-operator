@@ -22,7 +22,7 @@ def test_resource_lifecycle():
     # Create the namespace for the deployment
     subprocess.run(f"kubectl apply -f {os.path.join(example, 'namespace.yaml')}",shell=True, check=True, timeout=30, capture_output=True)
 
-    # Run the operator and simulate some activity!
+    # Run the operator
     with kopf.testing.KopfRunner(
         ['run', '--all-namespaces', '--standalone', "-m", "kanidm_operator"], #"--verbose",
         timeout=60, settings=settings,
@@ -40,8 +40,16 @@ def test_resource_lifecycle():
             raise
         
         # Check if the ingress is operational! We check functionality later through the kanidm CLI tool
+        import socket
+        ip = socket.gethostbyname("idm.example.com")
+        print(f"idm.example.com resolves to {ip}")
         import requests
         assert requests.head("https://idm.example.com") == 200
+
+        # Trigger adding a user
+        subprocess.run(f"kubectl apply -f {os.path.join(example, 'users.yaml')}",shell=True, check=True, timeout=30, capture_output=True)
+        # Wait for the deployment to be "processed" by the operator, so that the deployment is created
+        subprocess.run(r"kubectl wait -n kanidm user marcus --for=jsonpath='{.metadata.annotations.kanidm\.github\.io/processed}'='true'",shell=True, check=True, timeout=90, capture_output=True)
 
 
     # Ensure that the operator did not die on start, or during the operation.

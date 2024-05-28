@@ -20,6 +20,8 @@ async def on_create_user(
     cli_client.create_user(spec['name'], spec['displayName'])
     cli_client.set_user_emails(spec['name'], spec['emails'])
 
+    patch.setdefault("metadata", {}).setdefault("annotations", {})["kanidm.github.io/processed"] = "true"
+
 #@kopf.on.field("kanidm.github.io", "v1alpha1", "users", field="spec.name")
 #@kopf.on.field("kanidm.github.io", "v1alpha1", "users", field="spec.kanidmName")
 #async def on_update_group_name(**kwargs):

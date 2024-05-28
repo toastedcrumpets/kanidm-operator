@@ -49,6 +49,8 @@ async def on_create_oauth2client(
         if result.returncode != 0:
             raise kopf.TemporaryError(f"Failed to set scope-map for oauth2 client {spec['name']}")
         
+    patch.setdefault("metadata", {}).setdefault("annotations", {})["kanidm.github.io/processed"] = "true"
+        
 #@kopf.on.field("kanidm.github.io"  , "v1alpha1", "oauth2-clients", field="spec.name")
 #@kopf.on.field("kanidm.github.io", "v1alpha1", "oauth2-clients", field="spec.kanidmName")
 #async def on_update_oauth2client_name(**kwargs):
