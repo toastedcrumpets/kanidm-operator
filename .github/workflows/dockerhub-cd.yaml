@@ -104,6 +104,20 @@ jobs:
       ##################   Run the tests   ##################
       - name: Run the automated tests
         run: poetry run pytest -v
+
+      ################# Gather debug information about the state of the k8s cluster ###################
+      - name: Describe the state of the k8s cluster
+        if: always()
+        run: |
+          kubectl get -A nodes
+          kubectl get -A pods
+          kubectl get -A ingress
+          kubectl get -A clusterissuer
+          kubectl get -A certificate
+          kubectl get -A secret
+          kubectl get -A service
+          kubectl get -A deployment
+          kubectl get -A pod
   deploy:
     needs: tests
     runs-on: ubuntu-latest
