@@ -41,11 +41,18 @@ def test_resource_lifecycle():
         
         # Check if the ingress is operational! We check functionality later through the kanidm CLI tool
         import socket
-        ip = socket.gethostbyname("idm.example.com")
+        try:
+            ip = socket.gethostbyname("idm.example.com")
+        except socket.gaierror:
+            raise Exception("idm.example.com is not resolving to an IP address")
         print(f"idm.example.com resolves to {ip}")
-        import requests
-        assert requests.head("https://idm.example.com") == 200
 
+        import requests
+        try:
+            assert requests.head("https://idm.example.com", verify=False) == 200
+        except requests.exceptions.ConnectionError:
+            raise Exception("idm.example.com is not reachable")
+        
         # Trigger adding a user
         subprocess.run(f"kubectl apply -f {os.path.join(example, 'users.yaml')}",shell=True, check=True, timeout=30, capture_output=True)
         # Wait for the deployment to be "processed" by the operator, so that the deployment is created
