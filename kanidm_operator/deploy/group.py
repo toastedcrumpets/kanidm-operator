@@ -19,6 +19,8 @@ async def on_create_group(
     cli_client.create_group(spec['name'])
     cli_client.set_group_members(spec['name'], spec['members'])
 
+    patch.setdefault("metadata", {}).setdefault("annotations", {})["kanidm.github.io/processed"] = "true"
+
 #@kopf.on.field("kanidm.github.io", "v1alpha1", "groups", field="spec.name")
 #@kopf.on.field("kanidm.github.io", "v1alpha1", "groups", field="spec.kanidmName")
 #async def on_update_group_name(**kwargs):
@@ -35,7 +37,6 @@ async def on_update_group_members(
 ):
     cli_client = KanidmCLIClient(spec["kanidmName"], namespace, logger)
     cli_client.set_group_members(spec['name'], spec['members'])
-    patch.setdefault("metadata", {}).setdefault("annotations", {})["kanidm.github.io/processed"] = "true"
 
 @kopf.on.delete("kanidm.github.io", "v1alpha1", "groups")
 async def on_delete_group(
