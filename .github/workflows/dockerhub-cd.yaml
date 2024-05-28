@@ -17,35 +17,17 @@ jobs:
     steps:
       - name: Checkout the code
         uses: actions/checkout@v4
-      - name: Setup python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.11
-      - name: Install poetry
-        run: |
-          pip install poetry
-      - name: Set poetry environment
-        run: |
-          poetry env use 3.11
-      - name: Install the operator python dependencies
-        run: poetry install --no-root
-      - name: Setup rust to install kanidm CLI for the operator
-        uses: hecrj/setup-rust-action@v2
-      - name: Install dependencies for kanidm CLI tool
-        run: sudo apt-get install libudev-dev
-      - name: Install kanidm cli tool for use by the operator
-        run: |
-          cargo install kanidm_tools@=1.2.0
       - name: Spin up a k8s cluster
         uses: helm/kind-action@v1
       - name: Install an ingress controller, so we can test that functionality of the operator
         run: |
           kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
-          kubectl wait --for=condition=Ready pod -l app.kubernetes.io/component=controller -n ingress-nginx --timeout=90s
-      - name: Fetch logs of the ingress controller
+          kubectl wait --for=condition=Ready pod -l app.kubernetes.io/component=controller -n ingress-nginx --timeout=180s
+      - name: Describe state of the ingress controller
         if: always()
         run: |
           kubectl get pods -n ingress-nginx
+          kubectl describe -n ingress-nginx pod -l app.kubernetes.io/component=controller
           kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller
       - name: Get the ip of the ingress controller, so we can access the ingress
         run: |
@@ -62,9 +44,27 @@ jobs:
       - name: Redirect the idm.example.com hostname to the ingress controller, so the operator can access it as normal without a real DNS entry
         run: |
           sudo echo "$INGRESS_IP idm.example.com" | sudo tee -a /etc/hosts
+          - name: Setup python
+          uses: actions/setup-python@v5
+          with:
+            python-version: 3.11
+      - name: Install poetry
+        run: |
+          pip install poetry
+      - name: Set poetry environment
+        run: |
+          poetry env use 3.11
+      - name: Install the operator python dependencies
+        run: poetry install --no-root
+      - name: Setup rust to install kanidm CLI for the operator
+        uses: hecrj/setup-rust-action@v2
+      - name: Install dependencies for kanidm CLI tool
+        run: sudo apt-get install libudev-dev
+      - name: Install kanidm cli tool for use by the operator
+        run: |
+          cargo install kanidm_tools@=1.2.0
       - name: Run the automated tests
         run: poetry run pytest -v
-          
   deploy:
     needs: tests
     runs-on: ubuntu-latest
