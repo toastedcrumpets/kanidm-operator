@@ -1,9 +1,7 @@
-import time
 import subprocess
 import os.path
 import kopf.testing
 import pytest
-import yaml
 
 crd_yaml = os.path.relpath(os.path.join(os.path.dirname(__file__), '..', 'manifests/crds'))
 obj_yaml = os.path.relpath(os.path.join(os.path.dirname(__file__), '..', 'manifests/operator'))
@@ -40,7 +38,10 @@ def test_resource_lifecycle():
             output = subprocess.run(f"kubectl describe deployment -n kanidm kanidm",shell=True, check=True, timeout=30, capture_output=True)
             print(f"Failed while waiting for the deployment to complete, describe deployment output:\n {output.stdout}")
             raise
-            
+        
+        # Check if the ingress is operational! We check functionality later through the kanidm CLI tool
+        import requests
+        assert requests.head("https://idm.example.com") == 200
 
 
     # Ensure that the operator did not die on start, or during the operation.
