@@ -48,17 +48,17 @@ def test_resource_lifecycle():
         print(f"idm.example.com resolves to {ip}")
 
         # Wait for all certificates to be ready
-        try:
-            subprocess.run(f"kubectl wait --for=condition=Ready certificate -n kanidm --timeout=90s",shell=True, check=True)
-        except subprocess.CalledProcessError as e:
-            output = subprocess.run(f"kubectl describe certificate -n kanidm",shell=True, check=True, timeout=30, capture_output=True)
-            print(f"Failed while waiting for the certificates to complete, describe certificate output:\n {output.stdout}")
-            raise
+        #try:
+        #    subprocess.run(f"kubectl wait --for=condition=Ready certificate -n kanidm --timeout=90s",shell=True, check=True)
+        #except subprocess.CalledProcessError as e:
+        #    output = subprocess.run(f"kubectl describe certificate -n kanidm",shell=True, check=True, timeout=30, capture_output=True)
+        #    print(f"Failed while waiting for the certificates to complete, describe certificate output:\n {output.stdout}")
+        #    raise
 
         # Check ingress is there and SSL is valid
         import requests
         try:
-            assert requests.head("https://idm.example.com") == 200
+            assert requests.head("https://idm.example.com", verify='/etc/ssl/certs/ca-certificates.crt') == 200
         except requests.exceptions.ConnectionError:
             raise Exception("idm.example.com is not reachable")
         

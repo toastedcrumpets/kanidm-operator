@@ -32,13 +32,6 @@ jobs:
         run: |
           kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
           kubectl wait --for=condition=Ready pod -l app.kubernetes.io/component=controller -n ingress-nginx --timeout=90s
-      #- name: Describe state of the ingress controller
-      #  if: always()
-      #  run: |
-      #    kubectl describe nodes
-      #    kubectl get pods -n ingress-nginx
-      #    kubectl describe -n ingress-nginx pod -l app.kubernetes.io/component=controller
-      #    kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller
       - name: Redirect the idm.example.com hostname to the ingress controller, so the operator can access it as normal without a real DNS entry
         run: |
           INGRESS_IP=$(docker container inspect kanidm-operator-control-plane --format '{{ .NetworkSettings.Networks.kind.IPAddress }}')
@@ -109,15 +102,25 @@ jobs:
       - name: Describe the state of the k8s cluster
         if: always()
         run: |
+          echo "NODES"
           kubectl get -A nodes
-          kubectl get -A pods
-          kubectl get -A ingress
-          kubectl get -A clusterissuer
-          kubectl get -A certificate
-          kubectl get -A secret
-          kubectl get -A service
+          echo "DEPLOYMENTS"
           kubectl get -A deployment
-          kubectl get -A pod
+          echo "PODS"
+          kubectl get -A pods
+          echo "SERVICES"
+          kubectl get -A service
+          echo "INGRESSES"
+          kubectl get -A ingress
+          echo "CLUSTER ISSUERS"
+          kubectl get -A clusterissuer
+          echo "CERTIFICATES"
+          kubectl get -A certificate
+          echo "SECRETS"
+          kubectl get -A secret
+
+          echo "INGRESS details"
+          kubectl describe -A ingress
   deploy:
     needs: tests
     runs-on: ubuntu-latest
