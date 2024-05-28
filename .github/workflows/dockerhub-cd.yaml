@@ -71,9 +71,17 @@ jobs:
       # Much faster install, but they haven't got stable releases yet so may cause an issue
       - name: Install kanidm from the PPA
         run: |
+          # Install the key
+          curl -s --compressed "https://kanidm.github.io/kanidm_ppa/KEY.gpg" \
+            | gpg --dearmor \
+            | sudo tee /etc/apt/trusted.gpg.d/kanidm_ppa.gpg >/dev/null
+          
+          # Add the PPA
           curl -s --compressed "https://kanidm.github.io/kanidm_ppa/kanidm_ppa.list" \
             | grep $( ( . /etc/os-release && echo $ID) ) \
             | sudo tee /etc/apt/sources.list.d/kanidm_ppa.list
+
+          # Install the package
           sudo apt-get update
           sudo apt-get install kanidm
       - name: Run the automated tests
