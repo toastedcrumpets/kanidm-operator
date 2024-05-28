@@ -1,5 +1,9 @@
 name: Build, test, and deploy to Docker Hub
 
+env:
+  # This forces the python/requests library to use the system CA bundle, which is where we added our self-signed CA
+  REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+
 on:
   # Pushes and tags trigger the full workflow
   push:
