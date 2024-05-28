@@ -1,7 +1,19 @@
 # Kanidm operator
 
-Kubernetes operator that allows you to create groups, OAuth clients, Accounts and more for kanidm
+Kubernetes operator that deploys and manages one or more [Kanidm](https://kanidm.com/) instances.
 
+While Kanidm requires some backing storage to allow users to change their
+passwords, this operator lets you define the users, groups, and even oauth
+endpoints using CRDs. This means you can run your entire Single Sign On instance as an almost stateless deployment.
+
+# Requirements
+
+Your kubernetes cluster must have [cert-manager](https://cert-manager.io/)
+installed and configured, as kanidm needs to generate TLS certificates for its
+operation. In addition, you will need to setup a HTTPS-secured ingress for the
+kanidm instance (perhaps using letsencrypt with cert-manager), as the operator
+will use this ingress (and verify its certificate) to carry out changes in
+user/group/config etc.
 
 ## Getting Started
 
@@ -15,42 +27,13 @@ This will apply the latest `CustomResourceDefinition` for the operator. Then, de
 
 Which will deploy the operator in the `kanidm-system` namespace.
 
-To deploy kanidm using the operator, create a new `Kanidm` resource, following the examples at https://github.com/sbordeyne/kanidm-operator/tree/master/example
+# Examples
 
-```yaml
-apiVersion: v1alpha1
-kind: Kanidm
-metadata:
-  name: kanidm
-  namespace: kanidm
-spec:
-  version: 1.2.0
-  database:
-    fsType: other
-    storageClass: nfs-client
-    storageSize: 1Gi
-  domain: idm.example.com
-  certificate:
-    issuer: cluster-issuer
-  logLevel: info
-  backup:
-    enabled: true
-    schedule: "0 9 * * *"
-    versions: 7
-    storageClass: nfs-client
-    storageSize: 7Gi
-  webPort: 8443
-  ldapPort: 3890
-  highAvailability:
-    enabled: false
-    replicas: 1
-```
-
-If the operator is running, and kanidm is deployed, you can then use the operator to create groups, accounts, service accounts, OAuth2 clients and more using the provided CRDs. Note that if you deployed kanidm without the operator, it will not be able to access the server (you could trick it by renaming your service `kanidm-svc` and adding both the `admin` and `idm-admin` secrets in the `kanidm-system` namespace)
+The operator is tested using the definitions in [manifests/examples](manifests/examples). These show an example deployment of kanidm including creation of a user, a group, and an oauth2 endpoint for forgejo (community fork of gitea).
 
 # Developing
 
-To develop with the operator, you'll want to run it locally.
+To develop on the operator, you'll want to run it locally.
 You need to have a k8s cluster setup with a [working kube config](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) on your development system. You'll also need access to the kanidm deployment (e.g., https://idm.example.com).
 
 First, install the correct version of kanidm_tools and poetry, then use poetry to setup the python environment. You can do this following the commands in the [Dockerfile](Dockerfile) for debian systems.
@@ -62,3 +45,7 @@ To run the operator, you will again want a command like in the end of the [Docke
 ```
 poetry run -vvv kopf run --standalone --all-namespaces 
 ```
+
+## Unit tests
+
+There is a full End-to-end set of unit tests in github actions. The action boots a KIND k8s cluster, sets up an ingress controller (nginx), cert-manager with a self-signed Certificate Authority, then installs the operator. It then deploys all the examples and checks they deployed without errors.
