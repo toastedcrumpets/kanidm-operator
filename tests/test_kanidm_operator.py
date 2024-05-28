@@ -20,17 +20,23 @@ def test_resource_lifecycle():
     settings = kopf.OperatorSettings()
     settings.watching.server_timeout = 10
 
+    # Create a k8s client
+    from kubernetes import client, config, utils
+    config.load_kube_config()
+    k8s_client = client.ApiClient()
+    namespace = utils.create_from_yaml(k8s_client, os.path.join(example, 'namespace.yaml'))
+    print("Created namespace", namespace)
+
     # Run the operator and simulate some activity!
     with kopf.testing.KopfRunner(
-        ['run', '--all-namespaces', '--verbose', '--standalone', "-m", "kanidm_operator"],
+        ['run', '--all-namespaces', '--standalone', "-m", "kanidm_operator"], #"--verbose",
         timeout=60, settings=settings,
     ) as runner:
-        #subprocess.run(f"kubectl create -k {example}",
-        #               shell=True, check=True, timeout=10, capture_output=True)
-        #time.sleep(5)  # give it some time to react
-        #subprocess.run(f"kubectl delete -k {example}",
-        #               shell=True, check=True, timeout=10, capture_output=True)
+
+        Kanidm = utils.create_from_yaml(k8s_client, os.path.join(example, 'kanidm.yaml'))
+        print("Kanidm deployment", Kanidm, repr(Kanidm), type(Kanidm))
         time.sleep(1)  # give it some time to react
+
 
     # Ensure that the operator did not die on start, or during the operation.
     assert runner.exception is None
