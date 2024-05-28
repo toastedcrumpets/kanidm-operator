@@ -21,12 +21,13 @@ jobs:
         uses: helm/kind-action@v1
       - name: Install an ingress controller, so we can test that functionality of the operator
         run: |
-          kubectl label nodes kind-control-plane ingress-ready=true
+          kubectl label nodes --all ingress-ready=true
           kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
           kubectl wait --for=condition=Ready pod -l app.kubernetes.io/component=controller -n ingress-nginx --timeout=180s
       - name: Describe state of the ingress controller
         if: always()
         run: |
+          kubectl describe nodes
           kubectl get pods -n ingress-nginx
           kubectl describe -n ingress-nginx pod -l app.kubernetes.io/component=controller
           kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller
