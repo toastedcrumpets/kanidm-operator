@@ -27,11 +27,13 @@ jobs:
       - name: Set poetry environment
         run: |
           poetry env use 3.11
-      - name: Install the project python dependencies
+      - name: Install the operator python dependencies
         run: poetry install --no-root
-      - name: Setup rust
-        uses: hecrj/setup-rust-action@v2    
-      - name: Install kanidm cli operator
+      - name: Setup rust to install kanidm CLI for the operator
+        uses: hecrj/setup-rust-action@v2
+      - name: Install dependencies for kanidm CLI tool
+        run: sudo apt-get install libudev-dev
+      - name: Install kanidm cli tool for use by the operator
         run: |
           cargo install kanidm_tools@=1.2.0
       - name: Spin up a k8s cluster
