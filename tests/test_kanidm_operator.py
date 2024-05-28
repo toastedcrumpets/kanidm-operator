@@ -49,7 +49,7 @@ def test_resource_lifecycle():
 
         import requests
         try:
-            assert requests.head("https://idm.example.com", verify=False) == 200
+            assert requests.head("https://idm.example.com") == 200
         except requests.exceptions.ConnectionError:
             raise Exception("idm.example.com is not reachable")
         

@@ -41,6 +41,14 @@ jobs:
           echo "Pod IP is $INGRESS_IP"
           sudo echo "$INGRESS_IP idm.example.com" | sudo tee -a /etc/hosts
           cat /etc/hosts
+      - name: Create a Certificate Authority that we install to the system for "trusted" SSL communications
+        run: |
+          sudo apt-get install -y openssl ca-certificates
+          openssl genrsa -out KanidmCA.key 4096 
+          openssl req -x509 -new -nodes -key KanidmCA.key -sha256 -days 1826 -out KanidmCA.crt -subj '/CN=KanidmRoot CA/C=AT/ST=Vienna/L=Vienna/O=Kanidm'
+          kubectl create secret -n cert-manager tls kanidm-ca --cert=KanidmCA.crt --key=KanidmCA.key
+          sudo cp KanidmCA.crt /usr/local/share/ca-certificates/KanidmCA.crt
+          sudo update-ca-certificates --fresh
       - name: Install cert-manager, so we can issue a TLS certificate for kanidm
         run: |
           kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.5/cert-manager.yaml
