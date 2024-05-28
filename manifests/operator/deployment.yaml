@@ -35,7 +35,5 @@ spec:
           - --liveness=http://0.0.0.0:8080/healthz
           - --standalone
           - --all-namespaces
-          - --verbose
-          - /app/start.py
-          #- --module
-          #- /app/kanidm_operator
+          - --module
+          - /app/kanidm_operator
