@@ -9,10 +9,10 @@ spec:
   version: 1.2.0
   database:
     fsType: other
-    storageClass: longhorn
+    storageClass: standard # standard is the default for KIND, you might want something else like longhorn
     arcSize: 2048
     storageSize: 1Gi
-  domain: idm.eddymir.uk # Put your actual domain here, needed as we issue certificates for it
+  domain: idm.example.com # Put your actual domain here, needed as we issue certificates for it
   certificate:
     issuer: letsencrypt-prod # Put your actual issuer here, something from cert-manager
   logLevel: info
@@ -20,7 +20,7 @@ spec:
     enabled: true
     schedule: "0 9 * * *"
     versions: 7
-    storageClass: longhorn # Set your storage class here for the backup
+    storageClass: standard # standard is the default for KIND, you might want something else like longhorn
     storageSize: 7Gi
   webPort: 8443
   ldapPort: 3890
@@ -31,6 +31,6 @@ spec:
     annotations:
       nginx.ingress.kubernetes.io/backend-protocol: HTTPS
     enabled: true
-    ingressClass: nginx
+    ingressClass: nginx # this is what we use for testing, you might want something else, with perhaps different annotations?
     trustXForwardedFor: true
 ...

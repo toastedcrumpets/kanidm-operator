@@ -9,5 +9,5 @@ spec:
   displayName: Marcus
   kanidmName: kanidm-instance
   emails:
-    - marcus@eddymir.uk
+    - marcus@example.com
 ...

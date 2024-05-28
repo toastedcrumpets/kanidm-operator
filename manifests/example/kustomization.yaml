@@ -24,4 +24,4 @@ patches:
     patch: |-
       - op: replace
         path: /spec/domain
-        value: idm.example.com
+        value: git.example.com
