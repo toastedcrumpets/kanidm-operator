@@ -34,14 +34,16 @@ jobs:
       - name: Install an ingress controller, so we can test that functionality of the operator
         run: |
           kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+          kubectl wait --for=condition=Ready pod -l app.kubernetes.io/component=controller -n ingress-nginx --timeout=90s
+      - name: Get the ip of the ingress controller, so we can access the ingress
+        run: |
+            INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+            echo "Ingress IP: $INGRESS_IP"
+            echo "INGRESS_IP=$INGRESS_IP" >> "$GITHUB_ENV"
       - name: Install cert-manager, so we can issue a TLS certificate for kanidm
         run: |
           kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.5/cert-manager.yaml
-      - name: Get the ip of the ingress controller, so we can access the ingress
-        run: |
-          INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-          echo "Ingress IP: $INGRESS_IP"
-          echo "INGRESS_IP=$INGRESS_IP" >> "$GITHUB_ENV"
+          kubectl wait --for=condition=Available deployment cert-manager-webhook -n cert-manager --timeout=90s
       - name: Install the self-signed cluster certificate issuer to fake a letsencrypt production setup
         run: |
           kubectl apply -f tests/cluster-issuer.yaml
