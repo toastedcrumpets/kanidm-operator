@@ -31,11 +31,10 @@ jobs:
       #    kubectl get pods -n ingress-nginx
       #    kubectl describe -n ingress-nginx pod -l app.kubernetes.io/component=controller
       #    kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller
-      - name: Get the ip of the ingress controller, so we can access the ingress
+      - name: Get the ip of the ingress controller clusterip, so we can access the ingress
         run: |
-          kubectl get svc -n ingress-nginx ingress-nginx-controller
-          INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-          echo "Ingress IP: $INGRESS_IP"
+          INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.spec.clusterIP}')
+          echo "Ingress IP is $INGRESS_IP"
           echo "INGRESS_IP=$INGRESS_IP" >> "$GITHUB_ENV"
       - name: Install cert-manager, so we can issue a TLS certificate for kanidm
         run: |
@@ -47,10 +46,10 @@ jobs:
       - name: Redirect the idm.example.com hostname to the ingress controller, so the operator can access it as normal without a real DNS entry
         run: |
           sudo echo "$INGRESS_IP idm.example.com" | sudo tee -a /etc/hosts
-          - name: Setup python
-          uses: actions/setup-python@v5
-          with:
-            python-version: 3.11
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
       - name: Install poetry
         run: |
           pip install poetry
