@@ -36,4 +36,4 @@ spec:
           - --standalone
           - --all-namespaces
           - --module
-          - /app/kanidm_operator
+          - kanidm_operator
