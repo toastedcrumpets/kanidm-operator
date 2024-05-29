@@ -115,8 +115,13 @@ class KanidmCLIClient:
         if "No matching entries" in get_result.stdout.decode():
             return None
         
+        output = get_result.stdout.decode().lstrip('-\n')
+        # We know that the output contains incorrectly formatted lines for YAML
+        # https://github.com/kanidm/kanidm/issues/1998
+        # We can fix this by removing the line starting with "oauth2_rs_scope_map:"
+        output = "\n".join([l for l in output.split("\n") if not l.startswith("oauth2_rs_scope_map:")])
         try:
-            return yaml.safe_load(get_result.stdout.decode().lstrip('-\n'))
+            return yaml.safe_load(output)
         except yaml.YAMLError as e:
             raise kopf.TemporaryError(f"Failed to parse oauth2client data from kanidm CLI for {name} ({e})\nstdout={get_result.stdout.decode()}\nstderr={get_result.stderr.decode()}", delay=10)
 
