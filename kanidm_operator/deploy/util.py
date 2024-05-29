@@ -10,10 +10,10 @@ import subprocess
 import json
 import yaml
 
-class KanidmCLIClient:
+kanidm_exec = os.environ.get("KANIDM_EXEC", "kanidm")
 
+class KanidmCLIClient:
     def __init__(self, kanidm_name: str, namespace: str, logger: Logger, username: str = "idm_admin", silence_missing_kanidm: bool = False):
-        self.kanidm_exec="kanidm"
         self.logger = logger
 
         if os.getenv("KUBERNETES_SERVICE_HOST"):
@@ -71,7 +71,7 @@ class KanidmCLIClient:
         self.login()
 
     def command(self, args):
-        return subprocess.run([self.kanidm_exec, *args], env=self.env, capture_output=True)
+        return subprocess.run([kanidm_exec, *args], env=self.env, capture_output=True)
 
     def login(self):        
         login_result = self.command(["login"])

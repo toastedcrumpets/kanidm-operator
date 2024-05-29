@@ -48,6 +48,7 @@ RUN apt update && \
 WORKDIR /app
 COPY --from=base /app .
 COPY --from=base /root/.cargo/bin/kanidm /root/.cargo/bin/
+ENV KANIDM_EXEC="/root/.cargo/bin/kanidm"
 ENV PATH /app/.venv/bin:/root/.cargo/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # Add -vvv after poetry to debug poetry
