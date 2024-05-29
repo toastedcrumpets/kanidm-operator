@@ -35,7 +35,7 @@ def test_resource_lifecycle():
         try:
             subprocess.run(f"kubectl wait --for=condition=Available deployment kanidm -n kanidm --timeout=90s",shell=True, check=True)
         except subprocess.CalledProcessError as e:
-            output = subprocess.run(f"kubectl describe deployment -n kanidm kanidm",shell=True, check=True, timeout=30, capture_output=True)
+            output = subprocess.run(f"kubectl describe deployment -n kanidm kanidm",shell=True, check=True, timeout=60, capture_output=True)
             print(f"Failed while waiting for the deployment to complete, describe deployment output:\n {output.stdout}")
             raise
         
