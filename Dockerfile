@@ -24,7 +24,7 @@ RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 # Install the kanidm CLI tool 
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
-RUN cargo install kanidm_tools@=1.2.0
+RUN cargo install kanidm_tools@=1.2.2
 
 # Get the python environment setup using poetry
 RUN pipx install poetry

@@ -35,6 +35,19 @@ async def on_create_oauth2client(
         if result.returncode != 0:
             raise kopf.TemporaryError(f"Failed to set prefer-short-username for oauth2 client {spec['name']}")
     
+    # Default to enabling PKCE
+    if "enable-pkce" in spec and not spec["enable-pkce"]:
+        result = cli_client.command(['system', 'oauth2', 'warning-insecure-client-disable-pkce', spec['name']])
+    else:
+        result = cli_client.command(['system', 'oauth2', 'enable-pkce', spec['name']])
+    if result.returncode != 0:
+        raise kopf.TemporaryError(f"Failed to set enable-pkce for oauth2 client {spec['name']}")
+
+    if "callback-url" in spec:
+        result = cli_client.command(['system', 'oauth2', 'set-landing-url', spec['name'], spec['callback-url']])
+        if result.returncode != 0:
+            raise kopf.TemporaryError(f"Failed to set-landing-url for oauth2 client {spec['name']}")
+
     if "scope-map" in spec:
         if "group" not in spec['scope-map']:
             raise kopf.PermanentError("scope-map must contain a group entry")

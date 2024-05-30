@@ -35,6 +35,10 @@ spec:
                   type: string
                 prefer-short-username:
                   type: boolean
+                enable-pkce:
+                  type: boolean
+                callback-url:
+                  type: string
                 scope-map:
                   type: object
                   properties:
