@@ -26,6 +26,7 @@ async def on_create_oauth2client(
         "oauth2secret.yaml",
         name=spec["name"],
         secret=secret,
+        client_id=spec["name"],
     )
 
     # prefer-short-username is needed for gitea/forgejo
