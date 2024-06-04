@@ -192,7 +192,7 @@ class KanidmCLIClient:
         if secret.returncode != 0:
             raise kopf.TemporaryError(f"Failed to get secret for oauth2 client ({secret.returncode}), stdout={secret.stdout.decode()}, stderr={secret.stderr.decode()}", delay=10)
         
-        return secret.stdout.decode()
+        return secret.stdout.decode().strip()
     
     def delete_oauth2client(self, name: str):
         result = self.command(["system", "oauth2", "delete", name])
