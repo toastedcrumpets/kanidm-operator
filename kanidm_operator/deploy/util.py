@@ -22,7 +22,7 @@ class KanidmCLIClient:
             config.load_kube_config()
 
         customapi = kube_client.CustomObjectsApi()
-        
+
         # First discover the kanidm instance we're working on
         kanidms = customapi.list_cluster_custom_object(
                 "kanidm.github.io",
@@ -36,7 +36,7 @@ class KanidmCLIClient:
                 self.kanidm_spec = k
                 break
 
-        
+
         if self.kanidm_spec is None:
             if silence_missing_kanidm:
                 return
@@ -48,18 +48,27 @@ class KanidmCLIClient:
             namespace,
             label_selector=f"kanidm.github.io/credentials-for={slugify(username)}",
         )
+        # If we didn't find the secret in the relevant namespace, try the kanidm server namespace
+        if len(secrets.items) == 0:
+            kanidm_namespace = self.kanidm_spec["metadata"]["namespace"]
+            secrets = coreapi.list_namespaced_secret(
+                kanidm_namespace,
+                label_selector=f"kanidm.github.io/credentials-for={slugify(username)}",
+            )
+
 
         if len(secrets.items) == 0:
-            raise kopf.TemporaryError(f"No secret found for user {username} in the namespace {namespace}", delay=10)
+            raise kopf.TemporaryError(f"No secret found for user {username} in the namespace {namespace} or "
+                                      f"server namespace {kanidm_namespace}", delay=10)
         if len(secrets.items) > 1:
             raise kopf.TemporaryError(f"Multiple secrets for {username} in the namespace {namespace} found!", delay=10)
-        
+
         #logger.info(f"Secrets are {repr(secrets.items)}")
 
         secret: V1Secret = secrets.items[0]
         if "password" not in secret.data:
             raise kopf.TemporaryError(f"Secret for {username} in the namespace {namespace} does not contain a password!", delay=10)
-        
+
         password = b64decode(secret.data["password"].encode("utf-8")).decode("utf-8")
 
         self.env = dict(
@@ -73,7 +82,7 @@ class KanidmCLIClient:
     def command(self, args):
         return subprocess.run([kanidm_exec, *args], env=self.env, capture_output=True)
 
-    def login(self):        
+    def login(self):
         login_result = self.command(["login"])
         if login_result.returncode != 0:
             raise kopf.TemporaryError(f"Failed to login to kanidm, stdout={login_result.stdout}, stderr={login_result.stderr}", delay=10)
@@ -82,11 +91,11 @@ class KanidmCLIClient:
         get_result = self.command(["person", "get", "-o", "json", username])
         if get_result.returncode != 0:
             raise kopf.TemporaryError(f"Failed to get user ({get_result.returncode}), stdout={get_result.stdout.decode()}, stderr={get_result.stderr.decode()}", delay=10)
-        
+
         #We had a successful query, check if there's no matching entries
         if "No matching entries" in get_result.stdout.decode():
             return None
-        
+
         try:
             return json.loads(get_result.stdout)
         except json.JSONDecodeError as e:
@@ -96,11 +105,11 @@ class KanidmCLIClient:
         get_result = self.command(["group", "get", "-o", "json", name])
         if get_result.returncode != 0:
             raise kopf.TemporaryError(f"Failed to get group ({get_result.returncode}), stdout={get_result.stdout.decode()}, stderr={get_result.stderr.decode()}", delay=10)
-        
+
         #We had a successful query, check if there's no matching entries
         if "No matching group" in get_result.stderr.decode():
             return None
-        
+
         try:
             return json.loads(get_result.stdout)
         except json.JSONDecodeError as e:
@@ -110,11 +119,11 @@ class KanidmCLIClient:
         get_result = self.command(["system", "oauth2", "get", name])
         if get_result.returncode != 0:
             raise kopf.TemporaryError(f"Failed to get oauth2client ({get_result.returncode}), stdout={get_result.stdout.decode()}, stderr={get_result.stderr.decode()}", delay=10)
-        
+
         #We had a successful query, check if there's no matching entries
         if "No matching entries" in get_result.stdout.decode():
             return None
-        
+
         output = get_result.stdout.decode().lstrip('-\n')
         # We know that the output contains incorrectly formatted lines for YAML
         # https://github.com/kanidm/kanidm/issues/1998
@@ -133,10 +142,10 @@ class KanidmCLIClient:
             if create_result.returncode != 0:
                 raise kopf.TemporaryError(f"Failed to create user ({create_result.returncode}), stdout={create_result.stdout.decode()}, stderr={create_result.stderr.decode()}", delay=10)
             # Success, we created the user!
-            return    
+            return
 
         self.logger.warning(f"User {username} already exists, not creating. {existing_user_data}")
-        
+
         # Now we check if the already existing user needs a display name change
         if existing_user_data['attrs']["displayname"] != displayname:
             update_result = self.command(["person", "update", username, "--displayname", displayname])
@@ -144,7 +153,7 @@ class KanidmCLIClient:
                 raise kopf.TemporaryError(f"Failed to update user displayname ({update_result.returncode}), stdout={update_result.stdout.decode()}, stderr={update_result.stderr.decode()}", delay=10)
             # Success, we updated the user displayname!
         return
-    
+
     def delete_user(self, username: str):
         result = self.command(["person", "delete", username])
         if result.returncode != 0:
@@ -163,7 +172,7 @@ class KanidmCLIClient:
             if create_result.returncode != 0:
                 raise kopf.TemporaryError(f"Failed to create group ({create_result.returncode}), stdout={create_result.stdout.decode()}, stderr={create_result.stderr.decode()}", delay=10)
             # Success, we created the user!
-            return    
+            return
 
         self.logger.warning(f"Group {name} already exists, not creating. {existing_group_data}")
 
@@ -171,7 +180,7 @@ class KanidmCLIClient:
         result = self.command(["group", "set-members", name] + members)
         if result.returncode != 0:
             raise kopf.TemporaryError(f"Failed to update members for group ({result.returncode}), stdout={result.stdout.decode()}, stderr={result.stderr.decode()}", delay=10)
-        
+
     def delete_group(self, name: str):
         result = self.command(["group", "delete", name])
         if result.returncode != 0:
@@ -191,9 +200,9 @@ class KanidmCLIClient:
         secret  = self.command(["system", "oauth2", "show-basic-secret", name])
         if secret.returncode != 0:
             raise kopf.TemporaryError(f"Failed to get secret for oauth2 client ({secret.returncode}), stdout={secret.stdout.decode()}, stderr={secret.stderr.decode()}", delay=10)
-        
+
         return secret.stdout.decode().strip()
-    
+
     def delete_oauth2client(self, name: str):
         result = self.command(["system", "oauth2", "delete", name])
         if result.returncode != 0:
