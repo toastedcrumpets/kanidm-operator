@@ -25,6 +25,14 @@ spec:
                 - kanidmName
                 - origin
               properties:
+                secret:
+                  type: object
+                  properties:
+                    labels:
+                      type: object
+                      additionalProperties:
+                        type: string
+                        default: ""
                 name:
                   type: string
                 displayName:

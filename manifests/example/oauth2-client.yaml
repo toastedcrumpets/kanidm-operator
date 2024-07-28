@@ -15,4 +15,7 @@ spec:
     scopes:
       - openid
       - email
+  secret:
+    labels:
+      secret-kind: oauth2-client
 ...
