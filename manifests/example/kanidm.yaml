@@ -6,7 +6,7 @@ metadata:
   namespace: kanidm
 spec:
   #All these fields are currently required! TODO make them optional
-  version: 1.2.2
+  version: 1.5.0
   database:
     fsType: other
     storageClass: standard # standard is the default for KIND, you might want something else like longhorn

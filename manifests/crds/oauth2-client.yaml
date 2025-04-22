@@ -28,6 +28,11 @@ spec:
                 secret:
                   type: object
                   properties:
+                    annotations:
+                      type: object
+                      additionalProperties:
+                        type: string
+                        default: ""
                     labels:
                       type: object
                       additionalProperties:

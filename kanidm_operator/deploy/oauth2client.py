@@ -27,6 +27,7 @@ async def on_create_oauth2client(
         name=spec["name"],
         secret=secret,
         client_id=spec["name"],
+        extra_annotations=spec["secret"]["annotations"],
         extra_labels=spec["secret"]["labels"]
     )
 
