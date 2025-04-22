@@ -8,13 +8,13 @@ on:
   # Pushes and tags trigger the full workflow
   push:
     branches:
-      - 'master'
+      - "master"
     tags:
-      - 'v*'
+      - "v*"
   # Pull requests only trigger the unit tests
   pull_request:
     branches:
-      - 'master'
+      - "master"
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -22,7 +22,7 @@ jobs:
       - name: Checkout the code
         uses: actions/checkout@v4
 
-      ##################   Setup the Kubernetes cluster for testing   ##################
+      ##################   Setup the Kubernetes cluster for testing   ##########k########
       - name: Spin up a k8s cluster
         uses: helm/kind-action@v1
         with:
@@ -78,11 +78,14 @@ jobs:
       #### Much faster install, but they haven't got stable releases yet so may cause an issue
       - name: Install kanidm from the PPA
         run: |
-          # Install the key
-          curl -s --compressed "https://kanidm.github.io/kanidm_ppa/KEY.gpg" \
-            | gpg --dearmor \
-            | sudo tee /etc/apt/trusted.gpg.d/kanidm_ppa.gpg >/dev/null
-          
+          curl -s "https://kanidm.github.io/kanidm_ppa/kanidm_ppa.asc" \
+            | sudo tee /etc/apt/trusted.gpg.d/kanidm_ppa.asc >/dev/null
+          curl -s --compressed "https://kanidm.github.io/kanidm_ppa/kanidm_ppa.list" \
+            | grep $( ( . /etc/os-release && echo $VERSION_CODENAME) ) | grep stable \
+            | sudo tee /etc/apt/sources.list.d/kanidm_ppa.list
+          sudo apt update
+          sudo apt install -y kanidm
+
           # Add the PPA
           curl -s --compressed "https://kanidm.github.io/kanidm_ppa/kanidm_ppa.list" \
             | grep $( ( . /etc/os-release && echo $ID) ) \
@@ -90,7 +93,7 @@ jobs:
 
           # Install the package
           sudo apt-get update
-          sudo apt-get install kanidm
+          sudo apt-get install -y kanidm
 
       ##################   Run the tests   ##################
       - name: Run the automated tests
@@ -137,7 +140,7 @@ jobs:
         with:
           images: ${{ github.repository }} # this will be toastedcrumpets/kanidm-operator
       - name: Login to Docker Hub
-        if: github.event_name != 'pull_request'      
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
