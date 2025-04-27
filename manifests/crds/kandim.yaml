@@ -50,6 +50,11 @@ spec:
                     storageSize:
                       type: string
                       pattern: ^\d+[EPTGMK]i?$
+                    storageAnnotations:
+                      type: object
+                      additionalProperties:
+                        type: string
+                        default: ""
                 logLevel:
                   type: string
                   enum:
@@ -80,6 +85,11 @@ spec:
                     storageSize:
                       type: string
                       pattern: ^\d+[EPTGMK]i?$
+                    storageAnnotations:
+                      type: object
+                      additionalProperties:
+                        type: string
+                        default: ""
                 highAvailability:
                   type: object
                   properties:

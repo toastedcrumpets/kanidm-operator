@@ -11,6 +11,10 @@ metadata:
     app.kubernetes.io/component: pvc-backups
     app.kubernetes.io/part-of: kanidm
     app.kubernetes.io/created-by: kanidm-operator
+  annotations:
+    {% for key, value in backup_storage_annotations.items() %}
+    {{ key }}: '{{ value }}'
+    {% endfor %}
 spec:
   storageClassName: {{ backup_storage_class }}
   accessModes:
