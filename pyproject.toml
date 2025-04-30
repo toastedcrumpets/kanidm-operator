@@ -1,11 +1,12 @@
 [tool.poetry]
 name = "kanidm_operator"
-version = "1.1.0"
+version = "1.2.6"
 description = "Kubernetes Operator to manage Kanidm resources"
-authors = ["sbordeyne <simon.bordeyne@gmail.com>", "toastedcrumpets <m.bannerman@gmail.com"]
+authors = ["sbordeyne <simon.bordeyne@gmail.com>", "toastedcrumpets <m.bannerman@gmail.com>", "juniorfoo <joey@schwerv.com>"]
 license = "MIT"
 readme = "README.md"
 packages = [{include = "kanidm_operator"}]
+requires-poetry = ">=2.0"
 
 [tool.poetry.dependencies]
 python = "^3.11"

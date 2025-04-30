@@ -22,5 +22,5 @@ commonLabels:
 
 images:
   - name: kanidm-operator
-    newName: toastedcrumpets/kanidm-operator
-    newTag: master
+    newName: juniorfoo/kanidm-operator
+    newTag: latest

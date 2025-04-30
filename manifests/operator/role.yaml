@@ -10,7 +10,7 @@ rules:
 
   # Application: watching & handling for the custom resource we declare.
   - apiGroups: [kanidm.github.io]
-    resources: [accounts, groups, oauth2-clients, password-badlists, service-accounts, kanidms]
+    resources: [accounts, groups, oauth2-clients, password-badlists, service-accounts, kanidms, users]
     verbs: [list, watch, patch]
 
   # Application: other resources it produces and manipulates.
@@ -19,16 +19,16 @@ rules:
     verbs: [create, delete]
   - apiGroups: ["apps"]
     resources: [deployments]
-    verbs: [create, delete]
+    verbs: [create, delete, patch]
   - apiGroups: [""]
     resources: [persistentvolumeclaims, secrets, services, configmaps]
-    verbs: [create, delete, get, list, update]
+    verbs: [create, delete, get, list, update, patch]
   - apiGroups: [""]
-    resources: [pods]  # To get the admin/idm_admin passwords post deployment.
+    resources: [pods, pods/exec]  # To get the admin/idm_admin passwords post deployment.
     verbs: [get, list, watch, exec]
   - apiGroups: ["networking.k8s.io"]
     resources: [ingresses]
-    verbs: [create, delete, get, list, update]
+    verbs: [create, delete, get, list, update, patch]
   - apiGroups: [cert-manager.io]
     resources: [certificates]  # Create the TLS certificate/CSR for kanidm (required as it only supports HTTPS)
     verbs: [list, watch, patch, get, create]

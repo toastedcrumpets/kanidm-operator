@@ -41,11 +41,13 @@ async def on_create_kanidms(
         "pvc-backups.yaml",
         backup_storage_class=spec["backup"]["storageClass"],
         backup_storage_size=spec["backup"]["storageSize"],
+        backup_storage_annotations=spec["backup"].get("storageAnnotations", {}),
     )
     deployer.deploy(
         "pvc-db.yaml",
         db_storage_class=spec["database"]["storageClass"],
         db_storage_size=spec["database"]["storageSize"],
+        db_storage_annotations=spec["database"].get("storageAnnotations", {}),
     )
     deployer.deploy(
         "service.yaml",

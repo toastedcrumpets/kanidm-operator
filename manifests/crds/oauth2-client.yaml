@@ -25,6 +25,19 @@ spec:
                 - kanidmName
                 - origin
               properties:
+                secret:
+                  type: object
+                  properties:
+                    annotations:
+                      type: object
+                      additionalProperties:
+                        type: string
+                        default: ""
+                    labels:
+                      type: object
+                      additionalProperties:
+                        type: string
+                        default: ""
                 name:
                   type: string
                 displayName:
@@ -48,3 +61,15 @@ spec:
                       type: array
                       items:
                         type: string
+                claim-map:
+                  type: object
+                  properties:
+                    claim:
+                      type: string
+                    groups:
+                      type: object
+                      additionalProperties:
+                        type: string
+                        default: ""
+                    
+

@@ -53,6 +53,7 @@ class Deployer:
         api,
         method_name: str,
         namespace: str,
+        patch: bool,
         body: dict[str, Any],
         **kwargs,
     ):
@@ -61,13 +62,17 @@ class Deployer:
             return method(namespace=namespace, body=body, **kwargs)
         except k8s_exceptions.ApiException as e:
             if e.status == 409:
-                self.logger.debug(f"Calling {method_name} and object already exists, attempting patch.")
-                #self.logger.debug(f"Body is {repr(body)}.")
-                #self.logger.debug(f"kwargs is {repr(kwargs)}.")
-                # Try a patch instead
-                method_name = method_name.replace("create", "patch")
-                method = getattr(api, method_name)
-                return method(name=body['metadata']['name'], namespace=namespace, body=body, **kwargs)
+                if patch == True:
+                    self.logger.debug(f"Calling {method_name} and object already exists, attempting patch.")
+                    #self.logger.debug(f"Body is {repr(body)}.")
+                    #self.logger.debug(f"kwargs is {repr(kwargs)}.")
+                    # Try a patch instead
+                    method_name = method_name.replace("create", "patch")
+                    method = getattr(api, method_name)
+                    return method(name=body['metadata']['name'], namespace=namespace, body=body, **kwargs)
+                else:
+                    self.logger.warning(f"Calling {method_name} and object already exists.")
+
             else:
                 raise e
         return None
@@ -87,6 +92,7 @@ class Deployer:
                     api,
                     "create_namespaced_secret",
                     namespace,
+                    True,
                     body,
                 )
             case "Deployment":
@@ -94,6 +100,7 @@ class Deployer:
                     api,
                     "create_namespaced_deployment",
                     namespace,
+                    True,
                     body,
                 )
             case "Service":
@@ -101,6 +108,7 @@ class Deployer:
                     api,
                     "create_namespaced_service",
                     namespace,
+                    True,
                     body,
                 )
             case "Ingress":
@@ -108,6 +116,7 @@ class Deployer:
                     api,
                     "create_namespaced_ingress",
                     namespace,
+                    True,
                     body,
                 )
             case "Certificate":
@@ -117,6 +126,7 @@ class Deployer:
                     group="cert-manager.io",
                     version="v1",
                     namespace=namespace,
+                    patch=True,
                     plural="certificates",
                     body=body,
                 )
@@ -125,6 +135,7 @@ class Deployer:
                     api,
                     "create_namespaced_config_map",
                     namespace,
+                    True,
                     body,
                 )
             case "ServiceAccount":
@@ -132,6 +143,7 @@ class Deployer:
                     api,
                     "create_namespaced_service_account",
                     namespace,
+                    True,
                     body,
                 )
             case "Role":
@@ -139,6 +151,7 @@ class Deployer:
                     api,
                     "create_namespaced_role",
                     namespace,
+                    True,
                     body,
                 )
             case "RoleBinding":
@@ -146,6 +159,7 @@ class Deployer:
                     api,
                     "create_namespaced_role_binding",
                     namespace,
+                    True,
                     body,
                 )
             case "PersistentVolumeClaim":
@@ -153,6 +167,7 @@ class Deployer:
                     api,
                     "create_namespaced_persistent_volume_claim",
                     namespace,
+                    False,
                     body,
                 )
             case "Job":
@@ -160,6 +175,7 @@ class Deployer:
                     api,
                     "create_namespaced_job",
                     namespace,
+                    True,
                     body,
                 )
             case _:

@@ -21,11 +21,6 @@ RUN apt update && \
     rm -rf /var/lib/apt/lists/*
 RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-# Install the kanidm CLI tool 
-RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
-RUN cargo install kanidm_tools@=1.2.2
-
 # Get the python environment setup using poetry
 RUN pipx install poetry
 RUN poetry config virtualenvs.create true
@@ -35,6 +30,7 @@ RUN poetry config virtualenvs.in-project true
 COPY poetry.lock /app/poetry.lock
 COPY pyproject.toml /app/pyproject.toml
 COPY kanidm_operator /app/kanidm_operator
+COPY README.md /app/README.md
 RUN --mount=type=ssh poetry install --only=main --no-interaction --no-ansi
 
 FROM python:3.11-slim as final
@@ -45,10 +41,23 @@ RUN apt update && \
         && \
     rm -rf /var/lib/apt/lists/*
 
+# Install the KANIDM package
+RUN apt update && \
+    apt install -y curl
+
+# Install Kanidm binary
+# https://kanidm.github.io/kanidm_ppa/
+RUN curl -s "https://kanidm.github.io/kanidm_ppa/kanidm_ppa.asc" \
+    | tee /etc/apt/trusted.gpg.d/kanidm_ppa.asc >/dev/null
+RUN curl -s --compressed "https://kanidm.github.io/kanidm_ppa/kanidm_ppa.list" \
+    | grep $( ( . /etc/os-release && echo $VERSION_CODENAME) ) | grep stable \
+    | tee /etc/apt/sources.list.d/kanidm_ppa.list
+RUN apt update && \
+    apt install -y kanidm
+
 WORKDIR /app
 COPY --from=base /app .
-COPY --from=base /root/.cargo/bin/kanidm /root/.cargo/bin/
-ENV KANIDM_EXEC="/root/.cargo/bin/kanidm"
+ENV KANIDM_EXEC="kanidm"
 ENV PATH /app/.venv/bin:/root/.cargo/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # Add -vvv after poetry to debug poetry

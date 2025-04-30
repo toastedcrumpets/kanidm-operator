@@ -18,5 +18,5 @@ rules:
 
   # Application: read-only access for watching cluster-wide.
   - apiGroups: [kanidm.github.io]
-    resources: [accounts, groups, oauth2-clients, password-badlists, service-accounts, kanidms]
+    resources: [accounts, groups, oauth2-clients, password-badlists, service-accounts, kanidms, users]
     verbs: [list, watch]
