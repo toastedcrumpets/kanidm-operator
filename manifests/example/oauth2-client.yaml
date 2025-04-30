@@ -31,6 +31,13 @@ spec:
   origin: https://grafana.example.com
   callback-url: https://grafana.example.com/login/generic_oauth
   enable-pkce: true
+  scope-map:
+    group: grafana_users
+    scopes:
+      - openid
+      - profile
+      - email
+      - groups
   claim-map:
     claim: grafana_role
     groups:
