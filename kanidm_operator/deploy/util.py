@@ -80,6 +80,7 @@ class KanidmCLIClient:
         self.login()
 
     def command(self, args):
+        self.logger.info(f"Executing `{', '.join(args)}`")
         return subprocess.run([kanidm_exec, *args], env=self.env, capture_output=True)
 
     def login(self):
@@ -177,9 +178,10 @@ class KanidmCLIClient:
         self.logger.warning(f"Group {name} already exists, not creating. {existing_group_data}")
 
     def set_group_members(self, name: str, members: list[str]):
-        result = self.command(["group", "set-members", name] + members)
-        if result.returncode != 0:
-            raise kopf.TemporaryError(f"Failed to update members for group ({result.returncode}), stdout={result.stdout.decode()}, stderr={result.stderr.decode()}", delay=10)
+        if len(members) > 0:
+            result = self.command(["group", "set-members", name] + members)
+            if result.returncode != 0:
+                raise kopf.TemporaryError(f"Failed to update members for group ({result.returncode}), stdout={result.stdout.decode()}, stderr={result.stderr.decode()}", delay=10)
 
     def delete_group(self, name: str):
         result = self.command(["group", "delete", name])

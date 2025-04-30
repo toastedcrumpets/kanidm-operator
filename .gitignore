@@ -161,3 +161,4 @@ cython_debug/
 
 server.toml
 .vscode
+manifests.tmp.yaml

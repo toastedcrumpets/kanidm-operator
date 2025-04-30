@@ -65,6 +65,29 @@ async def on_create_oauth2client(
         if result.returncode != 0:
             raise kopf.TemporaryError(f"Failed to set scope-map for oauth2 client {spec['name']}")
 
+    if "claim-map" in spec:
+        if "claim" not in spec['claim-map']:
+            raise kopf.PermanentError("claim-map must contain a claim entry")
+        claim = spec['claim-map']['claim']
+
+        if "groups" not in spec['claim-map'] or not isinstance(spec['claim-map']['groups'], dict):
+            raise kopf.PermanentError("claim-map must contain groups entry which is an dict")
+
+        # kanidm system oauth2 update-claim-map-join 'grafana' 'grafana_role' array
+        result = cli_client.command(['system', 'oauth2', 'update-claim-map-join', spec['name'], claim, 'array'])
+        if result.returncode != 0:
+            raise kopf.TemporaryError(f"Failed to set update-claim-map-join to 'array' for {claim} for oauth2 client {spec['name']}")
+
+        for group_name, role_name in spec['claim-map']['groups'].items():
+            group = cli_client.get_group(group_name)
+            if group is None:
+                raise kopf.TemporaryError(f"Group {group_name} does not exist", delay=10)
+
+            # kanidm system oauth2 update-claim-map 'grafana' 'grafana_role' 'grafana_superadmins' 'GrafanaAdmin'
+            result = cli_client.command(['system', 'oauth2', 'update-claim-map', spec['name'], claim, group_name, role_name])
+            if result.returncode != 0:
+                raise kopf.TemporaryError(f"Failed to set update-claim-map to {group_name}/{role_name} for {claim} for oauth2 client {spec['name']}")
+
     patch.setdefault("metadata", {}).setdefault("annotations", {})["kanidm.github.io/processed"] = "true"
 
 #@kopf.on.field("kanidm.github.io"  , "v1alpha1", "oauth2-clients", field="spec.name")

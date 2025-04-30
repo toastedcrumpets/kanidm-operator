@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kanidm_operator"
-version = "1.2.5"
+version = "1.2.6"
 description = "Kubernetes Operator to manage Kanidm resources"
 authors = ["sbordeyne <simon.bordeyne@gmail.com>", "toastedcrumpets <m.bannerman@gmail.com>", "juniorfoo <joey@schwerv.com>"]
 license = "MIT"

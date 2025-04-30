@@ -18,4 +18,32 @@ spec:
   secret:
     labels:
       secret-kind: oauth2-client
-...
+---
+apiVersion: kanidm.github.io/v1alpha1
+kind: OAuth2Client
+metadata:
+  name: grafana
+  namespace: {{ .Release.Namespace }}
+spec:
+  kanidmName: kanidm-instance
+  name: grafana
+  displayName: grafana.example.com
+  origin: https://grafana.example.com
+  callback-url: https://grafana.example.com/login/generic_oauth
+  enable-pkce: true
+  claim-map:
+    claim: grafana_role
+    groups:
+      grafana_superadmins: GrafanaAdmin
+      grafana_admins: Admin
+      grafana_editors: Editor
+  secret:
+    annotations:
+      # Use reflector to sync the secret into the grafana namespace so that Grafana can read it
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "grafana"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "grafana"
+    labels:
+      secret-kind: oauth2-client
+
