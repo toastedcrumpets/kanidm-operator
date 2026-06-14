@@ -81,19 +81,13 @@ jobs:
       #### Much faster install, but they haven't got stable releases yet so may cause an issue
       - name: Install kanidm from the PPA
         run: |
-          # Install the key
-          curl -s --compressed "https://kanidm.github.io/kanidm_ppa/KEY.gpg" \
-            | gpg --dearmor \
-            | sudo tee /etc/apt/trusted.gpg.d/kanidm_ppa.gpg >/dev/null
-          
-          # Add the PPA
+          curl -s "https://kanidm.github.io/kanidm_ppa/kanidm_ppa.asc" \
+            | sudo tee /etc/apt/trusted.gpg.d/kanidm_ppa.asc >/dev/null
           curl -s --compressed "https://kanidm.github.io/kanidm_ppa/kanidm_ppa.list" \
-            | grep $( ( . /etc/os-release && echo $ID) ) \
+            | grep $( ( . /etc/os-release && echo $VERSION_CODENAME) ) | grep stable \
             | sudo tee /etc/apt/sources.list.d/kanidm_ppa.list
-
-          # Install the package
           sudo apt-get update
-          sudo apt-get install kanidm
+          sudo apt-get install -y kanidm
 
       ##################   Run the tests   ##################
       - name: Run the automated tests
@@ -126,14 +120,14 @@ jobs:
 
           echo "### ### ### ### ### ### "
 
-          echo "### KANIDM CRD"
-          kubectl describe -A kanidm
-          echo "### KANIDM USER CRD"
-          kubectl describe -A user
-          echo "### KANIDM GROUP CRD"
-          kubectl describe -A group
-          echo "### KANIDM OAUTH2 CRD"
-          kubectl describe -A oauth2-clients
+          echo "### KANIDM CR"
+          kubectl describe -A kanidms || true
+          echo "### KANIDM USER CR"
+          kubectl describe -A users || true
+          echo "### KANIDM GROUP CR"
+          kubectl describe -A groups || true
+          echo "### KANIDM OAUTH2 CR"
+          kubectl describe -A oauth2-clients || true
   deploy:
     needs: tests
     runs-on: ubuntu-latest
