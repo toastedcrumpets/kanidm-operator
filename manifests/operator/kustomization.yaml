@@ -17,7 +17,7 @@ labels:
       app.kubernetes.io/managed-by: kustomize
       app.kubernetes.io/name: kanidm-operator
       app.kubernetes.io/part-of: kanidm
-      app.kubernetes.io/version: 1.10.3+1
+      app.kubernetes.io/version: 1.10.3-op.1
     includeSelectors: false
 
 images:
