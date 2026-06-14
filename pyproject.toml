@@ -21,6 +21,7 @@ pylama = "^8.4.1"
 pytest = "^7.4.4"
 black = "^23.12.1"
 isort = "^5.13.2"
+setuptools = "^75.0.0"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.6.1"
