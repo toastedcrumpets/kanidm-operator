@@ -71,11 +71,12 @@ class KanidmCLIClient:
 
         password = b64decode(secret.data["password"].encode("utf-8")).decode("utf-8")
 
-        self.env = dict(
-            KANIDM_URL="https://"+self.kanidm_spec['spec']["domain"],
-            KANIDM_NAME=username,
-            KANIDM_PASSWORD=password,
-        )
+        self.env = os.environ.copy()
+        self.env.update({
+            "KANIDM_URL": "https://" + self.kanidm_spec['spec']["domain"],
+            "KANIDM_NAME": username,
+            "KANIDM_PASSWORD": password,
+        })
 
         self.login()
 
@@ -107,12 +108,16 @@ class KanidmCLIClient:
         if get_result.returncode != 0:
             raise kopf.TemporaryError(f"Failed to get group ({get_result.returncode}), stdout={get_result.stdout.decode()}, stderr={get_result.stderr.decode()}", delay=10)
 
-        #We had a successful query, check if there's no matching entries
-        if "No matching group" in get_result.stderr.decode():
+        output = get_result.stdout.decode().strip()
+        combined = f"{output}\n{get_result.stderr.decode()}"
+        if "No matching group" in combined:
             return None
 
         try:
-            return json.loads(get_result.stdout)
+            data = json.loads(output)
+            if isinstance(data, str) and "No matching group" in data:
+                return None
+            return data
         except json.JSONDecodeError as e:
             raise kopf.TemporaryError(f"Failed to parse group data from kanidm CLI for {name} ({e})\nstdout={get_result.stdout.decode()}\nstderr={get_result.stderr.decode()}", delay=10)
 
@@ -126,10 +131,11 @@ class KanidmCLIClient:
             return None
 
         output = get_result.stdout.decode().lstrip('-\n')
-        # We know that the output contains incorrectly formatted lines for YAML
-        # https://github.com/kanidm/kanidm/issues/1998
-        # We can fix this by removing the line starting with "oauth2_rs_scope_map:"
-        output = "\n".join([l for l in output.split("\n") if not l.startswith("oauth2_rs_scope_map:")])
+        # Kanidm CLI output is not valid YAML as-is (see kanidm/kanidm#1998).
+        skip_prefixes = ("oauth2_rs_scope_map:", "key_internal_data:")
+        output = "\n".join(
+            line for line in output.split("\n") if not line.startswith(skip_prefixes)
+        )
         try:
             return yaml.safe_load(output)
         except yaml.YAMLError as e:

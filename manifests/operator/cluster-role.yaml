@@ -16,7 +16,32 @@ rules:
     resources: [validatingwebhookconfigurations, mutatingwebhookconfigurations]
     verbs: [create, patch]
 
-  # Application: read-only access for watching cluster-wide.
+  # Framework: kopf progress events in any watched namespace.
+  - apiGroups: [""]
+    resources: [events]
+    verbs: [create]
+
+  # Application: watching & patching custom resources.
   - apiGroups: [kanidm.github.io]
-    resources: [accounts, groups, oauth2-clients, password-badlists, service-accounts, kanidms, users]
-    verbs: [list, watch]
+    resources: [groups, oauth2-clients, kanidms, users]
+    verbs: [list, watch, patch]
+
+  # Application: other resources the operator creates and manages.
+  - apiGroups: [batch, extensions]
+    resources: [cronjobs]
+    verbs: [create, delete]
+  - apiGroups: [apps]
+    resources: [deployments]
+    verbs: [create, delete, patch]
+  - apiGroups: [""]
+    resources: [persistentvolumeclaims, secrets, services, configmaps]
+    verbs: [create, delete, get, list, update, patch]
+  - apiGroups: [""]
+    resources: [pods, pods/exec]
+    verbs: [get, list, watch, exec]
+  - apiGroups: [networking.k8s.io]
+    resources: [ingresses]
+    verbs: [create, delete, get, list, update, patch]
+  - apiGroups: [cert-manager.io]
+    resources: [certificates]
+    verbs: [list, watch, patch, get, create]

@@ -159,8 +159,12 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-server.toml
 .vscode
 manifests.tmp.yaml
 
 .DS_Store
+.kanidm-session/
+KanidmCA.crt
+KanidmCA.key
+.bin/
+.kube/kind-kanidm-operator

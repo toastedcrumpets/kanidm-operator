@@ -1,9 +1,9 @@
 {% extends "configmap.yaml" %}
 {% block component %}server-config{% endblock %}
 {% block data %}
+    version = "2"
     bindaddress = "0.0.0.0:{{ http_port | default(8443) }}"
     ldapbindaddress = "0.0.0.0:{{ ldap_port | default(3630) }}"
-    trust_x_forward_for = {{ trust_x_forwarded_for | default(False) | lower }}
     db_path = "/db/kanidm.db"
     db_fs_type = "{{ db_fs_type | default('other') }}"
     {% if db_arc_size %}
@@ -14,7 +14,10 @@
     log_level = "{{ log_level | default('info') }}"
     domain = "{{ domain }}"
     origin = "https://{{ domain }}"
-    role = "{{ role | default('WriteReplica') }}"
+    {% if trust_x_forwarded_for | default(False) %}
+    [http_client_address_info]
+    x-forward-for = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/8"]
+    {% endif %}
     {% if backup_enabled %}
     [online_backup]
     path = "/backups/"

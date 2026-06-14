@@ -4,21 +4,21 @@ kind: Kustomization
 
 resources:
   - service-account.yaml
-  - role.yaml
   - cluster-role.yaml
-  - role-binding.yaml
   - cluster-role-binding.yaml
   - deployment.yaml
-  # - rotate-tokens.cronjob.yaml
 
 namespace: kanidm-system
 
-commonLabels:
-  app.kubernetes.io/component: kanidm-operator
-  app.kubernetes.io/instance: kanidm
-  app.kubernetes.io/managed-by: kustomize
-  app.kubernetes.io/name: kanidm-operator
-  app.kubernetes.io/part-of: kanidm
+labels:
+  - pairs:
+      app.kubernetes.io/component: kanidm-operator
+      app.kubernetes.io/instance: kanidm
+      app.kubernetes.io/managed-by: kustomize
+      app.kubernetes.io/name: kanidm-operator
+      app.kubernetes.io/part-of: kanidm
+      app.kubernetes.io/version: 1.10.3+1
+    includeSelectors: false
 
 images:
   - name: kanidm-operator

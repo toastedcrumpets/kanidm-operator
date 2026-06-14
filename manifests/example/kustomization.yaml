@@ -8,20 +8,24 @@ resources:
   - users.yaml
   - groups.yaml
   - oauth2-client.yaml
-  
-# You can change the patches below to suit your own domain!
+  # Optional: oauth2-client-grafana.yaml (requires grafana_* groups to exist first)
+
+# Patch domain/origin URLs to match your environment.
 patches:
-  - target: 
+  - target:
       kind: Kanidm
-      name: kanidm
+      name: kanidm-instance
     patch: |-
       - op: replace
         path: /spec/domain
         value: idm.example.com
-  - target: 
+  - target:
       kind: OAuth2Client
-      name: forgejo
+      name: forgejo-oauth
     patch: |-
       - op: replace
-        path: /spec/domain
-        value: git.example.com
+        path: /spec/origin
+        value: https://git.example.com
+      - op: replace
+        path: /spec/callback-url
+        value: https://git.example.com/user/oauth2/callback

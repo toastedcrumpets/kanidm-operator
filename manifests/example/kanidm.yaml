@@ -6,7 +6,7 @@ metadata:
   namespace: kanidm
 spec:
   #All these fields are currently required! TODO make them optional
-  version: 1.5.0
+  version: 1.10.3
   database:
     fsType: other
     storageClass: standard # standard is the default for KIND, you might want something else like longhorn
@@ -28,10 +28,10 @@ spec:
     enabled: false #HA is not working
     replicas: 1
   ingress:
+    enabled: true
+    ingressClassName: nginx
+    trustXForwardedFor: true
     annotations:
       nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-      kubernetes.io/ingress.class: nginx
       cert-manager.io/cluster-issuer: letsencrypt-prod
-    enabled: true
-    trustXForwardedFor: true
 ...

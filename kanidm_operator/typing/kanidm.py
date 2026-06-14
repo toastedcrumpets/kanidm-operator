@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 
 
 class LogLevel(StrEnum):
@@ -39,17 +39,10 @@ class CertificateResource(TypedDict):
     issuer: str
 
 
-class IngressControllers(StrEnum):
-    NGINX = "nginx"
-    TRAEFIK = "traefik"
-    HA_PROXY = "haproxy"
-    CADDY = "caddy"
-
-
 class IngressResource(TypedDict):
     enabled: bool
-    reverseProxy: IngressControllers
-    annotations: dict[str, str]
+    ingressClassName: NotRequired[str]
+    annotations: NotRequired[dict[str, str]]
     trustXForwardedFor: bool
 
 

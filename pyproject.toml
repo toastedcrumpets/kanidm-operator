@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kanidm_operator"
-version = "1.2.7"
+version = "1.10.3+1"
 description = "Kubernetes Operator to manage Kanidm resources"
 authors = ["sbordeyne <simon.bordeyne@gmail.com>", "toastedcrumpets <m.bannerman@gmail.com>", "juniorfoo <joey@schwerv.com>"]
 license = "MIT"
@@ -21,6 +21,10 @@ pylama = "^8.4.1"
 pytest = "^7.4.4"
 black = "^23.12.1"
 isort = "^5.13.2"
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.6.1"
+mkdocs-material = "^9.5.49"
 
 [build-system]
 requires = ["poetry-core"]

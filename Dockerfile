@@ -1,39 +1,29 @@
-FROM python:3.11-slim as base
+FROM python:3.11-slim AS base
 WORKDIR /app
-
-# Install pipx (tooling: poetry)
-RUN pip3 install --user pipx
-ENV PATH=/root/.local/bin:$PATH
-RUN pipx ensurepath
 
 RUN apt update && \
     apt install -y \
         build-essential \
-        openssh-client \
         libssl-dev \
         libffi-dev \
         python3-dev \
-        ssh \
         curl \
         pkg-config \
-        libudev-dev \
-        git && \
+        libudev-dev && \
     rm -rf /var/lib/apt/lists/*
-RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-# Get the python environment setup using poetry
-RUN pipx install poetry
-RUN poetry config virtualenvs.create true
-RUN poetry config virtualenvs.in-project true
+RUN pip3 install --user pipx && \
+    /root/.local/bin/pipx install poetry && \
+    /root/.local/bin/poetry config virtualenvs.create true && \
+    /root/.local/bin/poetry config virtualenvs.in-project true
 
-# Install python dependencies
-COPY poetry.lock /app/poetry.lock
-COPY pyproject.toml /app/pyproject.toml
-COPY kanidm_operator /app/kanidm_operator
-COPY README.md /app/README.md
-RUN --mount=type=ssh poetry install --only=main --no-interaction --no-ansi
+ENV PATH=/root/.local/bin:$PATH
 
-FROM python:3.11-slim as final
+COPY poetry.lock pyproject.toml README.md ./
+COPY kanidm_operator ./kanidm_operator
+RUN poetry install --only=main --no-interaction --no-ansi
+
+FROM python:3.11-slim AS final
 
 RUN apt update && \
     apt install -y \
@@ -58,7 +48,7 @@ RUN apt update && \
 WORKDIR /app
 COPY --from=base /app .
 ENV KANIDM_EXEC="kanidm"
-ENV PATH /app/.venv/bin:/root/.cargo/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV PATH=/app/.venv/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # Add -vvv after poetry to debug poetry
 ENTRYPOINT ["python3","-m", "kopf", "run"]

@@ -1,0 +1,46 @@
+site_name: Kanidm Operator
+site_description: Kubernetes operator for deploying and configuring Kanidm
+repo_url: https://github.com/juniorfoo/kanidm-operator
+repo_name: juniorfoo/kanidm-operator
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Custom resources:
+      - Kanidm instance: crds/kanidm.md
+      - User: crds/user.md
+      - Group: crds/group.md
+      - OAuth2 client: crds/oauth2-client.md
+  - Developing: developing.md
+  - Upgrading:
+      - Kanidm 1.10: upgrading/kanidm-1.10.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+
+plugins:
+  - search

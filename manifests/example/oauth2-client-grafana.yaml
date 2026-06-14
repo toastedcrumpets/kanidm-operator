@@ -1,0 +1,9 @@
+---
+apiVersion: kanidm.github.io/v1alpha1
+# Requires Kanidm groups grafana_users, grafana_superadmins, grafana_admins, and
+# grafana_editors to exist before this CR will reconcile successfully.
+kind: OAuth2Client
+metadata:
+  name: grafana
+  namespace: kanidm
+spec:

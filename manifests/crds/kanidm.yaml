@@ -112,6 +112,8 @@ spec:
                   properties:
                     enabled:
                       type: boolean
+                    ingressClassName:
+                      type: string
                     annotations:
                       type: object
                       additionalProperties:

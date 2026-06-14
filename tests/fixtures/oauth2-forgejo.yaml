@@ -10,7 +10,6 @@ spec:
   displayName: Forgejo
   origin: https://git.example.com
   prefer-short-username: true
-  callback-url: https://git.example.com/user/oauth2/callback
   scope-map:
     group: git-users
     scopes:
