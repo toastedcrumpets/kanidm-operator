@@ -1,3 +1,8 @@
+> [!CAUTION]
+> I stopped using kanidm as it is overkill for my homelab, and moved to basic auth which I configure with nixos, agenix, and nixos' k3s module.
+>
+> Others are continuing development of this operator, for example [juniorfoo/kanidm-operator](https://github.com/juniorfoo/kanidm-operator)
+
 # Kanidm operator
 
 A Kubernetes operator that deploys and manages one or more [Kanidm](https://kanidm.com/) instances.
